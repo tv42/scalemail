@@ -12,7 +12,6 @@ class Parsing(unittest.TestCase):
         i = times.TimeInterval.fromString('2001-02-01T12 2001-02-01T13')
         self.assertEquals(i.start, datetime.datetime(2001, 2, 1, 12))
         self.assertEquals(i.stop, datetime.datetime(2001, 2, 1, 13))
-    test_hour.todo = "mx.DateTime parses T12 as T01:02, and time.strptime doesn't handle timezones"
 
     def test_minute(self):
         i = times.TimeInterval.fromString('2001-02-01T12:05 2001-02-01T13:58')

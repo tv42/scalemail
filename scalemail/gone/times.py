@@ -30,6 +30,7 @@ class TimeInterval(object):
             # ISO (-inspired)
             ('%Y-%m-%dT%H:%M:%S', class_._datetime),
             ('%Y-%m-%dT%H:%M', class_._datetime),
+            ('%Y-%m-%dT%H', class_._datetime),
             ('%Y-%m-%d', class_._date),
             ]
 
