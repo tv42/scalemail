@@ -15,3 +15,11 @@ register("Backend box chooser",
 	 """,
 	 type="Scalemail.mapper.virtual.post",
          )
+
+register("Alias mapper",
+         "scalemail.mapper.alias",
+         description="""
+         Does the default Scalemail alias rewriting.
+	 """,
+	 type="Scalemail.mapper.virtual.pre",
+         )
