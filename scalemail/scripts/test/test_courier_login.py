@@ -1,7 +1,9 @@
 import os
 from twisted.trial import unittest
 from twisted.internet import defer
+from twisted.cred import error
 from cStringIO import StringIO
+from ldaptor import config as ldapconfig
 from scalemail.scripts import courier_login
 from scalemail.test.test_virtual import SetupMixin
 from ldaptor.test import util as ldaptestutil
@@ -11,6 +13,7 @@ class Login(SetupMixin, unittest.TestCase):
 dn: dc=example,dc=com
 
 dn: cn=fred,dc=example,dc=com
+objectClass: bork
 mail: fred@example.com
 scaleMailHost: h1
 
@@ -18,6 +21,7 @@ scaleMailHost: h1
     def setUp(self):
         SetupMixin.setUp(self)
         d=self.config.db.lookup('cn=fred,dc=example,dc=com')
+        ldapconfig.loadConfig(configFiles=[], reload=True)
         def _setPassword(e, password):
             return e.setPassword(password)
         d.addCallback(_setPassword, 'flintstone')
@@ -82,7 +86,7 @@ scaleMailHost: h1
                                 authtype='login',
                                 authdata='fred@example.com\nrubbles')
         fail = ldaptestutil.pumpingDeferredError(d)
-        fail.trap(courier_login.BadPassword)
+        fail.trap(error.UnauthorizedLogin)
 
     def test_success(self):
         env = {}

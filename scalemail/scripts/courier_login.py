@@ -1,5 +1,6 @@
 import os, sys
-from twisted.internet import protocol, reactor
+from twisted.internet import protocol, reactor, defer
+from twisted.cred import credentials, error
 from twisted.mail.maildir import initializeMaildir
 from ldaptor import checkers
 from ldaptor import config as ldapconfig
@@ -20,9 +21,6 @@ class ChainLogin(LoginError):
     pass
 
 class UnknownUser(ChainLogin):
-    pass
-
-class BadPassword(ChainLogin):
     pass
 
 class AlreadyAuthenticated(ChainLogin):
@@ -59,71 +57,6 @@ def _unbind(entry, client):
     client.unbind()
     return entry
 
-def _fetch(proto, base, mailAttribute, addr, mailhostAttribute):
-    baseEntry = ldapsyntax.LDAPEntry(client=proto,
-                                     dn=base)
-    d=baseEntry.search(filterObject=pureldap.LDAPFilter_equalityMatch(
-        attributeDesc=pureldap.LDAPAttributeDescription(value=mailAttribute),
-        assertionValue=pureldap.LDAPAssertionValue(value=addr),
-        ),
-                       attributes=[mailhostAttribute],
-                       scope=pureldap.LDAP_SCOPE_wholeSubtree,
-                       sizeLimit=1,
-                       )
-    return d
-
-def bind(config, addr, hostname, password):
-    CONFIG_LDAP_ATTRIBUTES_MAIL=config.getLDAPAttributeMailbox()
-    CONFIG_LDAP_ATTRIBUTES_MAILHOST=config.getLDAPAttributeMailHost()
-
-    dn = config.getDNForDomain(hostname)
-    serviceLocationOverride = config.getServiceLocationOverride()
-
-    c=ldapconnector.LDAPClientCreator(reactor, ldapclient.LDAPClient)
-    d=c.connectAnonymously(dn, serviceLocationOverride)
-    d.addCallback(_fetch,
-                  base=dn,
-                  mailAttribute=CONFIG_LDAP_ATTRIBUTES_MAIL,
-                  addr=addr,
-                  mailhostAttribute=CONFIG_LDAP_ATTRIBUTES_MAILHOST,
-                  )
-
-    def cb(results, password):
-        if not results:
-            raise UnknownUser
-        if len(results) > 1:
-            raise ManyUsersMatch, addr
-
-        e = results[0]
-        # TODO:
-        # - make str() unnecessary
-        # - allow e.bind(password) -> e?
-        d = e.client.bind(str(e.dn), password)
-        def _reportError(fail):
-            fail.trap(ldaperrors.LDAPInvalidCredentials)
-            raise BadPassword
-        d.addErrback(_reportError)
-        def _cb((matchedDN, serverSaslCreds), e):
-            return e
-        d.addCallback(_cb, e)
-        return d
-    d.addCallback(cb, password)
-    return d
-
-def getMailhost(config, e):
-    CONFIG_LDAP_ATTRIBUTES_MAILHOST=config.getLDAPAttributeMailHost()
-
-    if CONFIG_LDAP_ATTRIBUTES_MAILHOST not in e:
-        raise BadUserData, "User %s has no attribute %r" \
-            % (e.dn,
-               CONFIG_LDAP_ATTRIBUTES_MAILHOST)
-    mailhosts = e[CONFIG_LDAP_ATTRIBUTES_MAILHOST]
-    if len(mailhosts) != 1:
-        raise BadUserData, "User %s has too many mailhosts" % e.dn
-
-    mailhost = mailhosts.pop()
-    return mailhost
-
 def main(config, argv, env, service, authtype, authdata):
     if not argv[1:]:
         raise UsageError, "Need to provide some arguments."
@@ -145,20 +78,48 @@ def main(config, argv, env, service, authtype, authdata):
     if '@' not in userid:
         raise UserIdMustContainAtSign, userid
 
-    username = userid.split('@', 1)[0]
     hostname = userid.split('@', 1)[1]
+    ldapcfg = ldapconfig.LDAPConfig(
+        baseDN=config.getDNForDomain(hostname),
+        serviceLocationOverrides=config.getServiceLocationOverride(),
+        identitySearch='(%s=%%(name)s)' % config.getLDAPAttributeMailbox())
+    checker = checkers.LDAPBindingChecker(ldapcfg)
+
+    d = defer.maybeDeferred(checker.requestAvatarId,
+                            credentials.UsernamePassword(userid, password))
+
+    def fetchAttributes(e, *attrs):
+        return e.fetch(*attrs)
+    d.addCallback(fetchAttributes,
+                  config.getLDAPAttributeMailbox(),
+                  config.getLDAPAttributeMailHost(),
+                  )
+    d.addCallback(cbLoggedIn, config, env)
+    return d
+
+def only(e, attr):
+    vals = e.get(attr, None)
+    if vals is None:
+        raise BadUserData, "User %s has no attribute %r" % (e.dn, attr)
+    if len(vals) != 1:
+        raise BadUserData, \
+              "User %s has too many values for attribute %r" \
+              % (e.dn, attr)
+
+    val = vals.pop()
+    return val
+
+def cbLoggedIn(e, config, env):
+    mail = only(e, config.getLDAPAttributeMailbox())
+    username = mail.split('@', 1)[0]
+    hostname = mail.split('@', 1)[1]
 
     username = quot(username)
     hostname = quot(hostname)
 
     userpad = (username+'__')[:2]
 
-    d = bind(config, userid, hostname, password)
-    d.addCallback(cbLoggedIn, config, env, userid, hostname, userpad, username)
-    return d
-
-def cbLoggedIn(e, config, env, userid, hostname, userpad, username):
-    mailhost = getMailhost(config, e)
+    mailhost = only(e, config.getLDAPAttributeMailHost())
 
     userdir = os.path.join(config.getSpool(),
                            hostname,
@@ -174,7 +135,7 @@ def cbLoggedIn(e, config, env, userid, hostname, userpad, username):
         initializeMaildir(maildir)
 
     env['MAILDIR'] = '.'
-    env['AUTHENTICATED'] = userid
+    env['AUTHENTICATED'] = mail
     return maildir
 
 EX_OK=0
@@ -209,7 +170,8 @@ def run():
             os.chdir(r)
             os.execlp(sys.argv[1], *sys.argv[1:])
             die("Something is very wrong")
-        except ChainLogin:
+        except (error.UnauthorizedLogin,
+                ChainLogin):
             # TODO pass on authinfo
             os.execlp(sys.argv[1], *sys.argv[1:])
             die("Something is very wrong")
