@@ -1,10 +1,13 @@
-import errno
+import errno, datetime, email
+from twisted.python import log
 from twisted.protocols import smtp
 from ldaptor.protocols import pureldap
 from ldaptor.protocols.ldap import ldapclient, ldapsyntax, distinguishedname, ldapconnector
 from twisted.mail import maildir, protocols
 from twisted.internet import protocol, reactor, defer
 from scalemail import util
+from scalemail.gone import ldap, respond
+from scalemail.gone import util as goneutil
 import os.path
 
 def maildirmake(dir):
@@ -20,6 +23,64 @@ def mailfoldermake(dir):
 
 def _user_prefix(username):
     return (username[:2]+"__")[:2]
+
+class AutoRespondMessage(object):
+    __implements__ = smtp.IMessage,
+
+    def __init__(self, config, user, path, message, *a, **kw):
+        super(AutoRespondMessage, self).__init__(*a, **kw)
+        self.config = config
+        self.user = user
+        self.path = path
+        self.wrapped = message
+
+    def lineReceived(self, line):
+        self.wrapped.lineReceived(line)
+
+    def eomReceived(self):
+        now = datetime.datetime.now()
+        deliver = True
+        gone = ldap.is_active(config=self.config,
+                              entry=self.user.ldapEntry,
+                              now=now)
+        if gone is None:
+            d = defer.succeed(None)
+        else:
+            # ugliness, but otherwise the file in tmp/
+            # will most often be empty
+            self.wrapped.fp.flush()
+            f = open(self.wrapped.name)
+            f.seek(0)
+            msg = email.message_from_file(f)
+            f.close()
+            goneutil.setSender(msg, self.user.orig)
+            d = respond.process(
+                path=self.path,
+                msg=msg,
+                sender='',
+                goneInfo=gone,
+                #TODO smtpHost
+                )
+            if gone.settings.get('Deliver', 'True').lower() == 'false':
+                deliver = False
+
+        d.addCallback(self._eomReceived_autoReplied)
+        d.addCallback(self._eomReceived_deliver, deliver)
+        return d
+
+    def _eomReceived_autoReplied(self, notAutoreplied):
+        if notAutoreplied:
+            log.msg('Not autoreplied to: %s' % notAutoreplied)
+
+    def _eomReceived_deliver(self, _, deliver):
+        if deliver:
+            return self.wrapped.eomReceived()
+        else:
+            self.connectionLost()
+            return 'Skipping delivery.'
+
+    def connectionLost(self):
+        self.wrapped.connectionLost()
 
 class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
     """TODO"""
@@ -88,6 +149,16 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
     def _userdir(self, username):
         username, folder = util.addr_split(username, self.config.getRecipientDelimiters())
         return (os.path.join(self._userdir_prefix(username), username), folder)
+
+    def startMessage(self, user):
+        m = maildir.AbstractMaildirDomain.startMessage(self, user)
+        path = os.path.join(self._userdir(user.dest.local)[0], 'autorespond-rate')
+        try:
+            os.mkdir(path, 0700)
+        except OSError, err:
+            if err.errno!=errno.EEXIST:
+                raise
+        return AutoRespondMessage(self.config, user, path, m)
 
     def exists(self, user, memo=None):
         # do the LDAP dance and make sure the dir gets created
