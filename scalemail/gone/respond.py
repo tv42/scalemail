@@ -1,4 +1,4 @@
-import sys, sets
+import sets
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEMessage import MIMEMessage
@@ -27,7 +27,7 @@ def _shouldProcess(path, msg):
     sender = util.getSender(msg)
     try:
         rate.tick(sender)
-    except igone.RateExceededError, e:
+    except igone.RateExceededError:
         return "Sender has sent too many messages"
 
     return False
