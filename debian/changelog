@@ -1,4 +1,4 @@
-scalemail (0.9.trunk.36) unstable; urgency=low
+scalemail (0.10) unstable; urgency=low
 
   * Support for alias addresses, set scaleMailAlias attribute to
     any email addresses you want to function as aliases for the
@@ -6,9 +6,15 @@ scalemail (0.9.trunk.36) unstable; urgency=low
     the attribute name.
   * Schema: allow using the scaleMailForward and scaleMailForwardCopy
     attributes in scaleMailAccount LDAP objects.
+  * Cache plugin lookups, the lookup mechanism does too many stats to be
+    run all the time.
+  * Add explicit handling of email addresses with no hostname ("foo@"), to
+    cover edge cases.
+  * Add a fully working autoresponder (with nothing to drive it), still missing
+    some features.
   * Depend on ldaptor 0.0.30.
 
- -- Tommi Virtanen <tv@debian.org>  Fri, 12 Nov 2004 12:16:48 +0200
+ -- Tommi Virtanen <tv@debian.org>  Thu, 16 Dec 2004 08:46:41 +0200
 
 scalemail (0.9) unstable; urgency=low
 
