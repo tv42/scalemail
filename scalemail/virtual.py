@@ -32,6 +32,9 @@ class ScalemailVirtualMapFactory(protocol.ServerFactory):
         else:
             return False
 
+    def _getAccount(self, config, local, domain):
+        return util.getAccount(config, local, domain)
+
     def get(self, key):
         if '@' not in key:
             box, domain = util.host_split(key)
@@ -79,7 +82,7 @@ class ScalemailVirtualMapFactory(protocol.ServerFactory):
             def _afterPreMappers(answer, callMappers, config, local, domain):
                 if answer is not None:
                     return answer
-                d = util.getAccount(config, local, domain)
+                d = self._getAccount(config, local, domain)
 
                 def _gotAccount(account, callMappers, *a, **kw):
                     d = callMappers('post', account=account, *a, **kw)

@@ -1,0 +1,60 @@
+#!/usr/bin/python
+# "pop3\nlogin\ntest%example.com\npassword\n\n"
+
+import os, sys, traceback
+
+EX_OK=0
+EX_TEMPFAIL=75
+EX_USAGE=64
+EX_NOUSER=67
+EX_NOHOST=68
+
+def die(s):
+    print >>sys.stderr, "scalemail-courier-map-percent-to-at: %s" % s
+    sys.exit(EX_USAGE)
+
+def main():
+    if not sys.argv[1:]:
+        die("Need to provide some arguments")
+    if os.getenv('AUTHENTICATED'):
+        os.execlp(sys.argv[1], *sys.argv[1:])
+        die("Something is very wrong")
+
+    f = os.fdopen(3)
+    service = f.readline()
+    authtype = f.readline()
+    authdata = f.read()
+    f.close()
+
+    if authtype.rstrip() == 'login':    
+        lines = authdata.splitlines(True)
+        lines[0] = lines[0].replace('%', '@')
+        authdata = ''.join(lines)
+    data = ''.join([service, authtype, authdata])
+
+    r, w = os.pipe()
+    pid = os.fork()
+    if pid:
+        # parent
+        os.close(w)
+        os.dup2(r, 3)
+        os.execlp(sys.argv[1], *sys.argv[1:])
+        die("Something is very wrong")
+    else:
+        # child
+        while data:
+            n = os.write(w, data)
+            data = data[n:]
+        sys.exit(0)
+
+if __name__=='__main__':
+    try:
+        main()
+    except SystemExit:
+        raise
+    except:
+        try:
+            traceback.print_exc(file=sys.stderr)
+        finally:
+            sys.exit(EX_TEMPFAIL)
+

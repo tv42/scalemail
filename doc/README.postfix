@@ -1,0 +1,53 @@
+Configuring Postfix to work with Scalemail:
+------------------------------------------
+
+1. First, make sure /etc/scalemail/scalemail.conf looks sane.  You
+have to set BaseDN, and often you need atleast Service-Location.
+Remember to run "/etc/init.d/scalemail force-reload" after editing.
+
+If everything is set properly, you can test with
+
+	/usr/sbin/postmap -q username@example.com tcp:localhost:8026
+
+(of course you need to have that user in LDAP for this to work).  The
+result should look like
+
+	username@hostname.scalemail.example.com
+
+
+2. Make "hostname.scalemail.example.com" be delivered to Scalemail's
+SMTP service. Edit /etc/postfix/transport (replace example.com with
+your domain):
+
+	scalemail.example.com    smtp:[localhost]:8025
+	.scalemail.example.com   smtp:[localhost]:8025
+
+And run
+
+	postmap /etc/postfix/transport
+
+Make sure that /etc/postfix/main.cf has transport_maps defined
+properly, like this:
+
+	transport_maps = hash:/etc/postfix/transport
+
+You can also run the postfix and the final mail store given here on
+different hosts. For example, if you set MX records for
+scalemail.example.com appropriately, you can use
+
+	scalemail.example.com	smtp:scalemail.example.com:8025
+	.scalemail.example.com	smtp:scalemail.example.com:8025
+
+
+3. Edit /etc/postfix/main.cf, modify virtual_maps to include the
+Scalemail virtual mapping server.
+
+	virtual_maps = ..., tcp:localhost:8026, ...
+
+
+3. Make sure postfix reloads its configuration. Run
+
+	/etc/init.d/postfix force-reload
+
+
+That's it!

@@ -3,6 +3,7 @@ from ldaptor.protocols.ldap import distinguishedname
 
 class ScalemailConfig:
     config = None
+    configFiles = ['/etc/scalemail/scalemail.conf']
 
     def __init__(self):
         self.load()
@@ -22,7 +23,8 @@ class ScalemailConfig:
             'virtual-map-interface': '127.0.0.1',
             })
 
-        config.read('/etc/scalemail/scalemail.conf')
+        for fileName in self.configFiles:
+            config.read(fileName)
 
         try:
             config.add_section('Scalemail')

@@ -19,7 +19,7 @@ Python and Twisted.
 	  author="Tommi Virtanen",
 	  author_email="tv@debian.org",
 	  url="http://scalemail.sourceforge.net/",
-	  licence="GNU GPL",
+	  license="GNU GPL",
 
 	  packages=[
 	"scalemail",
@@ -30,7 +30,8 @@ Python and Twisted.
                       ('/etc/ldap/schema',
                        ["scalemail.schema"]),
                       ('/usr/lib/courier/authlib',
-                       ["scalemail-courier-login-mapper"]),
+                       ["scalemail-courier-login-mapper",
+                        "scalemail-courier-map-percent-to-at"]),
                       (os.path.join(get_python_lib(), 'scalemail'),
                        ["scalemail/plugins.tml"]),
                       ],

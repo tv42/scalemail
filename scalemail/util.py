@@ -59,7 +59,8 @@ class ScaleMailAccountNotFound(ScaleMailAccountSearchError):
 class ScaleMailAccountMultipleEntries(ScaleMailAccountSearchError):
     """User matches multiple LDAP entries, LDAP content inconsistent"""
 
-def getAccount(config, local, domain):
+def getAccount(config, local, domain,
+               clientFactory=None):
     """
 
     Get the LDAPEntry for this account.
@@ -68,15 +69,10 @@ def getAccount(config, local, domain):
     username, folder = addr_split(local, config.getRecipientDelimiters())
 
     dn = config.getDNForDomain(domain)
-    c = ldapconnector.LDAPClientCreator(reactor, ldapclient.LDAPClient)
-    d = c.connect(dn, config.getServiceLocationOverride())
-
-    def _bind(proto):
-        d=proto.bind()
-        d.addCallback(lambda _: proto)
-        return d
-
-    d.addCallback(_bind)
+    if clientFactory is None:
+        clientFactory = ldapclient.LDAPClient
+    c = ldapconnector.LDAPClientCreator(reactor, clientFactory)
+    d = c.connectAnonymously(dn, config.getServiceLocationOverride())
 
     def _fetch(proto,
                user, domain,
@@ -88,10 +84,10 @@ def getAccount(config, local, domain):
             attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
             assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)))
 
-        def _unbind(entries, proto):
+        def _unbind(r, proto):
             proto.unbind()
-            return entries
-        d.addCallback(_unbind, proto)
+            return r
+        d.addBoth(_unbind, proto)
 
         return d
 

@@ -33,7 +33,7 @@ MAILDIR_OVERRIDE=/var/spool/scalemail
 /etc/init.d/courier-pop:
 
 to the line containing "env -", add
-MAILDIR_OVERRIDE=/var/spool/scalemail
+MAILDIR_OVERRIDE="$MAILDIR_OVERRIDE"
 
 /etc/courier/authdaemonrc:
 
@@ -47,6 +47,7 @@ LDAP_MAIL		mail
 LDAP_GLOB_UID		scalemail
 LDAP_GLOB_GID		scalemail
 LDAP_FULLNAME		cn
+LDAP_AUTHBIND           1 (most likely you want this)
 
 /etc/default/courier:
 
@@ -64,3 +65,20 @@ MAILDIR="."
 
 
 That's it!
+
+
+
+Additionally, if you need to support mail clients that cannot have an
+at sign ("@") in the username (most often because they have one field
+that is <username>@<imapserver>, and split on the first at sign),
+there's a special helper for you.
+
+In /etc/courier/imapd and /etc/courier/pop3d, add
+scalemail-courier-map-percent-to-at to the beginning of AUTHMODULES,
+like this:
+
+AUTHMODULES="scalemail-courier-map-percent-to-at authdaemon \
+  scalemail-courier-login-mapper"
+
+Now users can login with "username%domain". Or, in one field as such
+broken clients often want it, "username%domain@server".

@@ -1,3 +1,38 @@
+scalemail (0.8) experimental; urgency=low
+
+  * Acknowledge NMU. (Closes: #211483)
+  * Use ldaptor's connectAnonymously.
+  * Unbind the LDAP connection even when search fails. Fixes an
+    LDAP connection leak when e.g. running 'postmap -q '""@'
+    tcp:localhost:8026', as OpenLDAP (rightfully) complained about
+    invalid search base DN "dc=". Need to protect against that
+    case, but other reasons can make the search fail, too, so this
+    is needed.
+  * Add first unit test to detect the horrible TCP connection leak
+    that breaks OpenLDAP all too easily.
+  * Add virtual map unit tests.
+  * Licence typo in setup.py.
+  * Update debian/generate-control to match current
+    debian/control.
+  * Depend on ldaptor 0.0.25 or greater to have all the necessary
+    features. This also implies uploading to experimental, for
+    now.
+  * Add scalemail-courier-map-percent-to-at, to support
+    username%domain@server.
+  * Write installation instructions.
+  * Move postfix transport file example from TODO to
+    README.postfix.
+
+ -- Tommi Virtanen <tv@debian.org>  Mon, 17 May 2004 21:08:47 +0300
+
+scalemail (0.7-0.1) unstable; urgency=low
+
+  * Non-Maintainer Upload by Gunnar Wolf <gwolf@debian.org>
+  * Adds a build-dependency on python, cleans up on cdbs' behavior
+    (applying Chris Cheney's patch) (Closes: #211483)
+
+ -- Gunnar Wolf <gwolf@debian.org>  Fri,  5 Mar 2004 11:56:40 -0600
+
 scalemail (0.7) unstable; urgency=low
 
   * Authentication used to fail if LDAP entry happened to have a
