@@ -8,25 +8,52 @@ class AccountExistsGetter(util.AccountGetter):
         o = ldapsyntax.LDAPEntry(client=proto, dn=dn)
         ldapAttributeAlias=self.config.getLDAPAttributeAlias()
         ldapAttributeMailbox=self.config.getLDAPAttributeMailbox()
-        d=o.search(filterObject=pureldap.LDAPFilter_and([
+        target = self.user+'@'+self.domain
+
+        d=o.search(filterObject=pureldap.LDAPFilter_or([
+
+            # alias
+            pureldap.LDAPFilter_and([
             pureldap.LDAPFilter_equalityMatch(
             attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeAlias),
-            assertionValue=pureldap.LDAPAssertionValue(self.user+'@'+self.domain)),
-
+            assertionValue=pureldap.LDAPAssertionValue(target)),
+            # must have mail attribute or we cannot forward it
             pureldap.LDAPFilter_present(ldapAttributeMailbox),
 
+            ]),
+
+            # real entry that conflicts with alias
+            pureldap.LDAPFilter_equalityMatch(
+            attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
+            assertionValue=pureldap.LDAPAssertionValue(target)),
+            
             ]))
 
         d.addBoth(self._unbind, proto)
         return d
 
     def _searchCompleted(self, entries):
-        if not entries:
+        target = self.user+'@'+self.domain
+        alias = []
+        real = []
+
+        ldapAttributeAlias=self.config.getLDAPAttributeAlias()
+        ldapAttributeMailbox=self.config.getLDAPAttributeMailbox()
+
+        for e in entries:
+            if target in e.get(ldapAttributeMailbox, []):
+                real.append(e)
+            elif target in e.get(ldapAttributeAlias, []):
+                alias.append(e)
+
+        if alias and real:
+            raise util.ScaleMailAccountMultipleEntries
+
+        if not alias:
             return None
         else:
-            ldapAttributeMailbox=self.config.getLDAPAttributeMailbox()
             l = []
-            for e in entries:
+            for e in alias:
                 l.extend(e[ldapAttributeMailbox])
             return l
 

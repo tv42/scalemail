@@ -162,3 +162,24 @@ scaleMailAlias: numbers@example.com
         self.assertRaises(
             ldaperrors.LDAPNoSuchObject,
             ldaptestutil.pumpingDeferredResult, d)
+
+class Alias(SetupMixin, unittest.TestCase):
+    ldif = """version: 1
+dn: dc=example,dc=com
+
+dn: cn=real,dc=example,dc=com
+mail: foo@example.com
+scaleMailHost: h1
+
+dn: cn=fake,dc=example,dc=com
+mail: somethingelse@example.com
+scaleMailHost: h1
+scaleMailAlias: foo@example.com
+
+"""
+
+    def test_conflict(self):
+        d = self.map.get('foo@example.com')
+        self.assertRaises(
+            util.ScaleMailAccountMultipleEntries,
+            ldaptestutil.pumpingDeferredResult, d)
