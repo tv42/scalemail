@@ -210,9 +210,11 @@ def run():
             os.execlp(sys.argv[1], *sys.argv[1:])
             die("Something is very wrong")
         except ChainLogin:
+            # TODO pass on authinfo
             os.execlp(sys.argv[1], *sys.argv[1:])
             die("Something is very wrong")
         except RetryLogin:
+            # TODO pass on authinfo
             l = []
 
             argc = int(os.environ['AUTHARGC'])
