@@ -1,3 +1,1 @@
-doc/README.courier
-doc/courier-authlib-maildir-override.patch
-
+doc/*
