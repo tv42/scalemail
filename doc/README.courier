@@ -5,7 +5,7 @@ The new way:
 -----------
 
 1. You need to change Courier configuration files.
-Replace existing entries and add missing entries to match:
+Replace existing entries:
 
 /etc/courier/imapd:
 
