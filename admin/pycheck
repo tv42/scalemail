@@ -1,0 +1,4 @@
+#!/bin/sh
+set -e
+
+find . \( -name SCCS -o -name BitKeeper -o -name admin -o -name build -o -name debian \) -prune -o -name '*.py' -print0 | xargs -0 pychecker

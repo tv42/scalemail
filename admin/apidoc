@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+PYTHONPATH="lib${PYTHONPATH:+:$PYTHONPATH}" \
+    epydoc \
+	-o ../scalemail-API \
+	-n Scalemail \
+	-u http://tv.debian.net/software/scalemail/ \
+	$(bk sfiles -Ug|grep '\.py$'|grep -v -- '-')

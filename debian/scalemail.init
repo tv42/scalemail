@@ -1,0 +1,48 @@
+#!/bin/sh
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+
+pidfile=/var/run/scalemail/scalemail.pid
+rundir=/
+file=/usr/lib/python2.2/site-packages/scalemail/backend.py
+more_args=--no_save
+
+[ -r /etc/default/twisted-web ] && . /etc/default/twisted-web
+
+test -x /usr/bin/twistd2.2 || exit 0
+test -r $file || exit 0
+
+case "$1" in
+    start)
+        echo -n "Starting scalemail: twistd"
+        start-stop-daemon --start --quiet --exec /usr/bin/twistd2.2 --  \
+                          --pidfile=$pidfile --rundir=$rundir --python=$file\
+                          --syslog --prefix=scalemail --quiet $more_args
+        echo "."
+    ;;
+
+    stop)
+        echo -n "Stopping scalemail: twistd"
+        start-stop-daemon --stop --quiet --pidfile $pidfile
+        while [ -f $pidfile ] && /bin/kill -0 `cat $pidfile`; do \
+                 echo -n "."; \
+        done
+        echo " done."
+    ;;
+
+    restart)
+        $0 stop
+        $0 start
+    ;;
+
+    force-reload)
+        $0 restart
+    ;;
+
+    *)
+        echo "Usage: /etc/init.d/scalemail {start|stop|restart|force-reload}" >&2
+        exit 1
+    ;;
+esac
+
+exit 0

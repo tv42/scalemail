@@ -1,0 +1,49 @@
+Configuring Courier-IMAP to work with Scalemail:
+-----------------------------------------------
+
+1. You need to rebuild courier-imap, more specifically
+courier-authdaemon, with a patch.
+
+$ apt-get source courier-authdaemon
+$ cd courier-*
+$ patch -p1 </usr/share/doc/scalemail/courier-authlib-maildir-fallback.patch
+$ dpkg-buildpackage -rfakeroot -us -uc
+$ su
+# dpkg -i ../courier-authdaemon_*.deb
+
+
+2. Make sure you have courier-authldap installed
+
+# apt-get install courier-authldap
+
+
+3. You need to change Courier configuration files.
+Replace existing entries and add missing entries to match:
+
+/etc/courier/imapd:
+
+AUTHMODULES="authdaemon"
+MAILDIR_FALLBACK=/var/spool/scalemail
+
+/etc/courier/pop3d:
+
+AUTHMODULES="authdaemon"
+MAILDIR_FALLBACK=/var/spool/scalemail
+
+/etc/courier/authdaemonrc:
+
+authmodulelist="authldap scalemail-courier-login-mapper"
+
+/etc/courier/authldaprc:
+
+LDAP_MAIL		mail
+LDAP_GLOB_UID		scalemail
+LDAP_GLOB_GID		scalemail
+LDAP_FULLNAME		cn
+
+
+
+4. Restart courier-imap and courier-imap-ssl
+
+
+That's it!

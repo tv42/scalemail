@@ -1,0 +1,174 @@
+#!/usr/bin/python
+#
+#    scalemail-courier-login-mapper - make Courier-IMAP match Scalemail accounts
+#    Copyright (C) 2001  Tommi Virtanen <tv@debian.org>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+import sys, traceback
+
+EX_OK=0
+EX_TEMPFAIL=75
+EX_USAGE=64
+EX_NOUSER=67
+EX_NOHOST=68
+
+def die(s):
+    print >>sys.stderr, "scalemail-courier-login-mapper: %s" % s
+    sys.exit(EX_USAGE)
+
+### quoting
+import re, string
+_quot_trans = string.maketrans('', '')
+_quot_trans = string.lower(_quot_trans)
+_quot_trans = re.sub("[^a-z0-9.-]", '_', _quot_trans)
+
+_quot_re = re.compile(r'\.+')
+
+def quot(s):
+    match = _quot_re.match(s)
+    if match:
+        s = match.end()*'_' + s[match.end():]
+    s=string.translate(s, _quot_trans)
+    return s
+
+def _bind(proto):
+    d=proto.bind() #TODO bind as
+    d.addCallback(lambda _: proto)
+    return d
+
+def _unbind(entry, client):
+    client.unbind()
+    return entry
+
+def _fetch(proto, base, mailAttribute, addr, mailhostAttribute):
+    from ldaptor.protocols import pureldap
+    from ldaptor.protocols.ldap import ldapsyntax
+    baseEntry = ldapsyntax.LDAPEntry(client=proto,
+                                     dn=base)
+    d=baseEntry.search(filterObject=pureldap.LDAPFilter_equalityMatch(
+        attributeDesc=pureldap.LDAPAttributeDescription(value=mailAttribute),
+        assertionValue=pureldap.LDAPAssertionValue(value=addr),
+        ),
+                       attributes=[mailhostAttribute],
+                       scope=pureldap.LDAP_SCOPE_wholeSubtree,
+                       sizeLimit=1,
+                       )
+    d.addCallback(_unbind, proto)
+    return d
+
+def getMailhost(addr, hostname, config):
+    CONFIG_LDAP_ATTRIBUTES_MAIL=config.getLDAPAttributeMailbox()
+    CONFIG_LDAP_ATTRIBUTES_MAILHOST=config.getLDAPAttributeMailHost()
+
+    dn = config.getDNForDomain(hostname)
+    serviceLocationOverride = config.getServiceLocationOverride()
+
+    from ldaptor.protocols.ldap import ldapclient, ldapconnector
+    from twisted.internet import protocol, reactor
+
+    c=ldapconnector.LDAPClientCreator(reactor, ldapclient.LDAPClient)
+    d=c.connect(dn, serviceLocationOverride)
+    d.addCallback(_bind)
+    d.addCallback(_fetch,
+                  base=dn,
+                  mailAttribute=CONFIG_LDAP_ATTRIBUTES_MAIL,
+                  addr=addr,
+                  mailhostAttribute=CONFIG_LDAP_ATTRIBUTES_MAILHOST,
+                  )
+
+    from twisted.trial import util
+    results = util.deferredResult(d)
+    if not results:
+        die("Unknown user")
+    if len(results) > 1:
+        die("Many users match %r" % addr)
+
+    e = results[0]
+    if CONFIG_LDAP_ATTRIBUTES_MAILHOST not in e:
+        die("User %r has no attribute %r"
+            % (addr,
+               CONFIG_LDAP_ATTRIBUTES_MAILHOST))
+    mailhosts = e[CONFIG_LDAP_ATTRIBUTES_MAILHOST]
+    if len(mailhosts) != 1:
+        die("User %r has too many mailhosts")
+
+    mailhost = mailhosts.pop()
+    return mailhost
+
+def main():
+    import os
+    import scalemail.config
+
+    cfg = scalemail.config.ScalemailConfig()
+    cfg.getSpool()
+
+    if os.getcwd() != cfg.getSpool():
+        if not sys.argv[1:]:
+            die("Need to provide some arguments")
+        os.execlp(sys.argv[1], *sys.argv[1:])
+
+    authaddr = os.getenv('AUTHADDR')
+    if authaddr is None:
+        die('Need to have environment variable AUTHADDR.')
+
+    authaddr = authaddr.replace('%', '@')
+
+    if '@' not in authaddr:
+        die("AUTHADDR must contain an at-sign: %r" % authaddr)
+
+    username = authaddr.split('@', 1)[0]
+    hostname = authaddr.split('@', 1)[1]
+
+    username = quot(username)
+    hostname = quot(hostname)
+
+    userpad = (username+'__')[:2]
+
+    mailhost = getMailhost(authaddr, hostname, cfg)
+
+    userdir = os.path.join(cfg.getSpool(),
+                           hostname,
+                           mailhost,
+                           userpad)
+
+    if not os.path.isdir(userdir):
+        os.mkdir(userdir, 0700)
+
+    maildir = os.path.join(userdir, username)
+
+    if not os.path.isdir(maildir):
+        from twisted.mail.maildir import initializeMaildir
+        initializeMaildir(maildir)
+
+    os.chdir(maildir)
+    if not sys.argv[1:]:
+        die("Need to provide some arguments")
+    os.execlp(sys.argv[1], *sys.argv[1:])
+    die("Something is very wrong")
+
+
+if __name__=='__main__':
+    try:
+        main()
+    except SystemExit:
+        raise
+    except:
+        try:
+            traceback.print_exc(file=sys.stderr)
+        finally:
+            sys.exit(EX_TEMPFAIL)
+

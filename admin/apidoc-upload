@@ -1,0 +1,4 @@
+#!/bin/sh
+rsync -a --copy-unsafe-links --delete \
+	../scalemail-API/ \
+	tv.debian.net:/var/www/tv.debian.net/software/scalemail/api

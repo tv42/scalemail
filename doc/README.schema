@@ -1,0 +1,14 @@
+You may want to use the Scalemail LDAP Schema.
+
+There is an example LDAP schema for Scalemail accounts in
+/etc/ldap/schema/scalemail.schema. You probably want to include it in
+the schemas supported by your LDAP server. With OpenLDAP version 2,
+this happens by adding a line like
+
+  include /etc/ldap/schema/scalemail.schema
+
+to /etc/ldap/slapd.conf. The procedure may vary.
+
+You are not required to use this or any other schema. All Scalemail
+(or Postfix) cares about is that the attribute names given can be
+found.

@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+    # idea stolen from postfix.postinst: make sure our user exists,
+    # simplest portable way to check is to chown something.
+    cd /var/spool/scalemail
+    touch temp
+    CHOWN=''
+    if ! chown scalemail temp 2>/dev/null; then
+	adduser --quiet --system --home /var/lib/scalemail \
+	    --no-create-home --disabled-password \
+	    --gecos 'Scalemail' --group scalemail
+	CHOWN=1
+    fi
+    rm -f temp 2>/dev/null
+    # if we created the user, bring the files back from root
+    if [ "$CHOWN" ]; then
+	chown -R scalemail:scalemail /var/spool/scalemail \
+	    2>&1 || true
+    fi
+    chown -R scalemail:scalemail \
+	/var/run/scalemail \
+	2>&1 || true
+fi
+
+#DEBHELPER#

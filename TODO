@@ -1,0 +1,27 @@
+* for all domains: postfix virtual(5) entries via a TCP map:
+   example.com			DUMMY
+   foo@example.com		-> do an LDAP lookup and possibly
+   				return e.g. foo@h42.scalemail.example.com
+
+* for all domains: postfix transport(5) entries:
+   scalemail.example.com	smtp:[localhost]:8025
+   .scalemail.example.com	smtp:[localhost]:8025
+  or
+   scalemail.example.com	smtp:scalemail.example.com:8025
+   .scalemail.example.com	smtp:scalemail.example.com:8025
+
+* file bug on postfix.deb to remove scalemail-backend from master.cf
+
+* support aliases!
+
+* make twisted DNS SRV "climb up the domain" -> foo.bar.example.com,
+   bar.example.com, example.com, com
+
+* courier-pop3d exits if given "user nonexisting", should give sane
+   error
+
+* pop/imap for users who have not received email yet
+
+* see whether LDAP schema can be shared
+
+  - http://www.wossname.org.uk/~mathie/software/draft-lachman-ldap-mail-routing-03.txt

@@ -1,0 +1,50 @@
+scalemail (0.1) unstable; urgency=low
+
+  * Almost reimplemented from scratch; this is no longer the prototype.
+  * Typo in description. Closes: #125337.
+  * Scalemail is now arch-independant, as it should have always
+    been. Closes: #116896.
+  * /etc/ldap/schema/scalemail.schema is a conffile. Closes: #132115.
+  * Well-defined schema, real OID, etc. Shouldn't conflict with standard
+    attributeTypes. Closes: #98383.
+  * Got rid of /usr/doc support.
+  * Upgraded policy to 3.5.6
+  * Removed built-in canonicalization support, it's just really not
+    related to scalemail and used to assume things that really aren't true
+    for virtual users, such as users actually having uid's. If you want the
+    canonicalization features, feel free to add a suitable LDAP map entry
+    yourself; you can use the same entries in LDAP easily.
+  * Follow Twisted mail API changes.
+  * Follow Ldaptor API changes.
+  * Fully use DNS SRV records.
+  * Support receiving emails to user@scalemail.example.com, if and only if
+    user belongs to a backend box that is server by this host. (Add later
+    support for relaying to correct backend box.)
+  * Configuration file support.
+  * Support "baseless" operation, for nicer configurability.
+
+ -- Tommi Virtanen <tv@debian.org>  Tue, 10 Sep 2002 21:50:36 +0300
+
+scalemail (0.0.2001.08.19) unstable; urgency=low
+
+  * Add Courier-IMAP integration.
+  * Move example files in the Makefile, not debian/rules.
+  * Depend on postfix | postfix-tls. Closes: #98351, #99317.
+
+ -- Tommi Virtanen <tv@debian.org>  Sun, 19 Aug 2001 00:47:47 +0300
+
+scalemail (0.0.2001.05.18) unstable; urgency=low
+
+  * Fix postfix/main.cf continuation line handling; used to blindly
+    append continuation lines to value even when the config lines really
+    belonged to a different variable later in the file. Closes: #97911.
+  * Make backup copies of /etc/postfix/main.cf, if it is ever edited.
+    Closes: #97910.
+
+ -- Tommi Virtanen <tv@debian.org>  Fri, 18 May 2001 23:55:15 +0300
+
+scalemail (0.0.2001.05.05) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Tommi Virtanen <tv@debian.org>  Sat,  5 May 2001 21:45:48 +0300

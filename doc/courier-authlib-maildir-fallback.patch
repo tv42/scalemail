@@ -1,0 +1,28 @@
+diff -Naur courier-0.42.2.orig/authlib/success.c courier-0.42.2/authlib/success.c
+--- courier-0.42.2.orig/authlib/success.c	2003-02-27 06:48:52.000000000 +0200
++++ courier-0.42.2/authlib/success.c	2003-07-28 14:59:43.000000000 +0300
+@@ -43,11 +43,19 @@
+ 		libmail_changeuidgid(*uid, *gid);
+ 	}
+ 
+-	if (chdir(homedir))
+-	{
+-		fprintf(stderr, "chdir \"%s\": %s\n", homedir,
+-			strerror(errno));
+-		authexit(1);
++	if (*homedir=='\0' || (chdir(homedir) && errno==ENOENT)) {
++		if (!getenv("MAILDIR_FALLBACK"))
++		{
++			write(2, "AUTHFAILURE\n", 12);
++			authexit(1);
++		}
++		if (chdir(getenv("MAILDIR_FALLBACK")))
++		{
++			fprintf(stderr, "chdir to MAILDIR_FALLBACK: %s\n",
++				strerror(errno));
++			authexit(1);
++		}
++		putenv("MAILDIR=.");
+ 	}
+ 
+ 	if (!authaddr)	authaddr="";
