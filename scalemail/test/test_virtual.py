@@ -39,7 +39,18 @@ class ConfigDriver(config.ScalemailConfig):
         factory.deferred.callback(client)
 
 
-class TestVirtual(unittest.TestCase):
+class SetupMixin:
+    def setUp(self):
+        self.spool = self.mktemp()
+        os.mkdir(self.spool)
+        os.mkdir(os.path.join(self.spool, 'example.com'))
+        self.config = ConfigDriver(spool=self.spool,
+                                   ldif=self.ldif)
+        self.map = virtual.ScalemailVirtualMapFactory(self.config)
+        
+
+
+class TestVirtual(SetupMixin, unittest.TestCase):
     ldif = """version: 1
 dn: dc=example,dc=com
 
@@ -70,14 +81,6 @@ scaleMailAlias: numbers@example.com
 
 """
 
-    def setUp(self):
-        self.spool = self.mktemp()
-        os.mkdir(self.spool)
-        os.mkdir(os.path.join(self.spool, 'example.com'))
-        self.config = ConfigDriver(spool=self.spool,
-                                   ldif=self.ldif)
-        self.map = virtual.ScalemailVirtualMapFactory(self.config)
-        
     def test_map_domainOnly_notExist(self):
         self.assertEquals(self.map.get('not-exist'),
                           None)
