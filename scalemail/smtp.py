@@ -40,7 +40,10 @@ def maildirmake(dir):
     maildir.initializeMaildir(dir)
 
 def mailfoldermake(dir):
-    maildirmake(dir)
+    if not os.path.isdir(dir):
+        os.mkdir(dir, 0700)
+        for subdir in ['new', 'cur', 'tmp']:
+            os.mkdir(os.path.join(dir, subdir), 0700)
     f=open(os.path.join(dir, "maildirfolder"), 'a')
     f.close()
 

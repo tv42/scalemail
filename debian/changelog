@@ -1,3 +1,12 @@
+scalemail (0.2) unstable; urgency=low
+
+  * No longer depend on debconf.
+  * Don't use Twisted's initializeMaildir for creating maildir
+    folders, as it wants to create a Trash folder, and having a
+    maildir/.folder/.Trash is bad.
+
+ -- Tommi Virtanen <tv@debian.org>  Sun,  3 Aug 2003 10:44:05 +0300
+
 scalemail (0.1) unstable; urgency=low
 
   * Almost reimplemented from scratch; this is no longer the prototype.

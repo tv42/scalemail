@@ -8,7 +8,7 @@ Build-Depends-Indep: python2.2-dev, debhelper (>= 4.1.0), cdbs (>= 0.4.0.1)
 Package: scalemail
 Section: mail
 Architecture: all
-Depends: python (>= 2.2), python (<< 2.3), python2.2-twisted, python2.2-ldaptor (>= 0.0.18), postfix (>= 0.0.20010329.SNAPSHOT) | postfix-tls (>= 0.0.20010329.SNAPSHOT), perl, debconf (>= 0.9.40), make
+Depends: python (>= 2.2), python (<< 2.3), python2.2-twisted, python2.2-ldaptor (>= 0.0.18), postfix (>= 0.0.20010329.SNAPSHOT) | postfix-tls (>= 0.0.20010329.SNAPSHOT), perl, make
 Suggests: courier-imap-ssl | courier-ssl, slapd
 Description: Scalable virtual mail domain system built on Postfix and LDAP
  A scalable (but not HA, at least not yet) virtual domain system for
