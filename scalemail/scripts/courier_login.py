@@ -166,7 +166,7 @@ def run():
                      service=service,
                      authtype=authtype,
                      authdata=authdata)
-            r = util.wait(d)
+            r = util.wait(d, timeout=60.0)
             os.chdir(r)
             os.execlp(sys.argv[1], *sys.argv[1:])
             die("Something is very wrong")
