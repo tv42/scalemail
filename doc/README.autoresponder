@@ -1,6 +1,11 @@
 How to use the autoresponder:
 ----------------------------
 
+WARNING: Twisted (as of 1.3.0-5) contains two severe bugs that
+may cause lost mail and actually prevent using the autoresponder.
+See http://bugs.debian.org/289993 for more.
+
+
 In the LDAP entry for an account, add one or more instances of the
 attributetype scaleMailAway. The values should look like:
 
