@@ -1,3 +1,9 @@
+scalemail (0.13) unstable; urgency=low
+
+  * Oops, include missing packages. 0.12 was never uploaded.
+
+ -- Tommi Virtanen <tv@debian.org>  Wed, 12 Jan 2005 00:38:37 +0200
+
 scalemail (0.12) unstable; urgency=low
 
   * Email autoresponder support ("vacation"), known as scalemail.gone:
