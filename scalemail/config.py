@@ -14,8 +14,12 @@ class ScalemailConfig:
             'ldap-attribute-mail': 'mail',
             'ldap-attribute-mailhost': 'scaleMailHost',
             'ldap-attribute-mailquota': 'scaleMailQuota',
+            'ldap-attribute-mailforward': 'scaleMailForward',
+            'ldap-attribute-mailforwardcopy': 'scaleMailForwardCopy',
             'smtp-port': '8025',
             'recipient-delimiters': '+',
+            'virtual-map-port': '8026',
+            'virtual-map-interface': '127.0.0.1',
             })
 
         config.read('/etc/scalemail/scalemail.conf')
@@ -38,11 +42,23 @@ class ScalemailConfig:
     def getLDAPAttributeMailQuote(self):
         return self.config.get('Scalemail', 'ldap-attribute-mailquota')
 
+    def getLDAPAttributeMailForward(self):
+        return self.config.get('Scalemail', 'ldap-attribute-mailforward')
+
+    def getLDAPAttributeMailForwardCopy(self):
+        return self.config.get('Scalemail', 'ldap-attribute-mailforwardcopy')
+
     def getRecipientDelimiters(self):
         return self.config.get('Scalemail', 'recipient-delimiters')
 
     def getSMTPPort(self):
         return self.config.getint('Scalemail', 'smtp-port')
+
+    def getPostfixVirtualMapPort(self):
+        return self.config.getint('Scalemail', 'virtual-map-port')
+
+    def getPostfixVirtualMapInterface(self):
+        return self.config.get('Scalemail', 'virtual-map-interface')
 
     def getDNForDomain(self, domain):
         key = 'map-domain %s' % domain

@@ -24,6 +24,20 @@ attributetype ( 1.3.6.1.4.1.9586.2.100.2.1.5
 	SUBSTR caseIgnoreSubstringsMatch
 	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{40} )
 
+attributetype ( 1.3.6.1.4.1.9586.2.100.2.1.6
+	NAME 'scaleMailForward'
+	DESC 'Forward all email to this address'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{40} )
+
+attributetype ( 1.3.6.1.4.1.9586.2.100.2.1.7
+	NAME 'scaleMailForwardCopy'
+	DESC 'Forward a copy of all email to this address'
+	EQUALITY caseIgnoreMatch
+	SUBSTR caseIgnoreSubstringsMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{40} )
+
 objectclass ( 1.3.6.1.4.1.9586.2.100.2.2.1
 	NAME 'scaleMailAccount'
 	AUXILIARY

@@ -1,8 +1,3 @@
-* for all domains: postfix virtual(5) entries via a TCP map:
-   example.com			DUMMY
-   foo@example.com		-> do an LDAP lookup and possibly
-   				return e.g. foo@h42.scalemail.example.com
-
 * for all domains: postfix transport(5) entries:
    scalemail.example.com	smtp:[localhost]:8025
    .scalemail.example.com	smtp:[localhost]:8025

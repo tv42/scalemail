@@ -1,40 +1,11 @@
 import errno
 from twisted.protocols import smtp
-from ldaptor.protocols import pureldap, pureber
+from ldaptor.protocols import pureldap
 from ldaptor.protocols.ldap import ldapclient, ldapsyntax, distinguishedname, ldapconnector
 from twisted.mail import maildir, protocols
 from twisted.internet import protocol, reactor, defer
-import string
+from scalemail import util
 import os.path
-
-### quoting
-import re
-_quot_trans = string.maketrans('', '')
-_quot_trans = string.lower(_quot_trans)
-_quot_trans = re.sub("[^a-z0-9.-]", '_', _quot_trans)
-
-_quot_re = re.compile(r'\.+')
-
-def quot(s):
-    match = _quot_re.match(s)
-    if match:
-        s = match.end()*'_' + s[match.end():]
-    s=string.translate(s, _quot_trans)
-    return s
-
-
-def host_split(host):
-    """Split host part of email address into box and domain"""
-    separator=".scalemail."
-    i=host.find(separator)
-    if i==-1:
-        if host.startswith('scalemail.'):
-            return (None, host[len('scalemail.'):])
-        else:
-            return (None, None)
-    box=quot(host[:i])
-    domain=quot(host[i+len(separator):])
-    return (box, domain)
 
 def maildirmake(dir):
     maildir.initializeMaildir(dir)
@@ -49,22 +20,6 @@ def mailfoldermake(dir):
 
 def _user_prefix(username):
     return (username[:2]+"__")[:2]
-
-def addr_split(addr, recipientDelimiters):
-    """Split local part of email address into user and folder"""
-    user=quot(addr)
-    folder=None
-    for c in recipientDelimiters:
-        try:
-            i=string.index(addr, c)
-        except ValueError:
-            pass
-        else:
-            user=quot(addr[:i])
-            folder=quot(addr[i+1:])
-            break
-    return (user, folder)
-
 
 class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
     """TODO"""
@@ -127,11 +82,11 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
         self.config = config
 
     def _userdir_prefix(self, username):
-        username, folder = addr_split(username, self.config.getRecipientDelimiters())
+        username, folder = util.addr_split(username, self.config.getRecipientDelimiters())
         return os.path.join(self.root, _user_prefix(username))
 
     def _userdir(self, username):
-        username, folder = addr_split(username, self.config.getRecipientDelimiters())
+        username, folder = util.addr_split(username, self.config.getRecipientDelimiters())
         return (os.path.join(self._userdir_prefix(username), username), folder)
 
     def exists(self, user, memo=None):
@@ -150,7 +105,7 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
             return d
 
     def ldapUserExists(self, username):
-        username, folder = addr_split(username, self.config.getRecipientDelimiters())
+        username, folder = util.addr_split(username, self.config.getRecipientDelimiters())
 
         dn = self.config.getDNForDomain(self.domain)
         c=ldapconnector.LDAPClientCreator(reactor, ldapclient.LDAPClient)
@@ -237,7 +192,7 @@ class ScalemailDelivery(protocols.ESMTPDomainDelivery):
             raise smtp.SMTPBadRcpt, (user, 550, 'No domain name given')
 
         # test whether such host dir exists
-        box, domain=host_split(user.dest.domain)
+        box, domain=util.host_split(user.dest.domain)
 
         if domain is None:
             raise smtp.SMTPBadRcpt, (user, 550, 'Invalid domain name given: %r' % user.dest.domain)
@@ -260,55 +215,19 @@ class ScalemailDelivery(protocols.ESMTPDomainDelivery):
 
         """
         root=os.path.join(self.proto.factory.spool, domain)
-        username, folder = addr_split(user.dest.local, self.proto.factory.config.getRecipientDelimiters())
+        d = util.getAccount(config=self.proto.factory.config,
+                            local=user.dest.local,
+                            domain=domain)
+        d.addCallback(util.getBoxes, config=self.proto.factory.config)
 
-        dn = self.proto.factory.config.getDNForDomain(domain)
-        c = ldapconnector.LDAPClientCreator(reactor, ldapclient.LDAPClient)
-        d = c.connect(dn, self.proto.factory.config.getServiceLocationOverride())
-
-        def _bind(proto):
-            d=proto.bind()
-            d.addCallback(lambda _: proto)
-            return d
-
-        d.addCallback(_bind)
-
-        def _fetch(proto,
-                   user, domain,
-                   ldapAttributeMailbox,
-                   ldapAttributeMailHost,
-                   dn):
-            o = ldapsyntax.LDAPEntry(client=proto, dn=dn)
-            d=o.search(filterObject=pureldap.LDAPFilter_equalityMatch(
-                attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
-                assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)),
-                       typesOnly=0,
-                       attributes=[ldapAttributeMailHost])
-            return d
-
-        d.addCallback(_fetch,
-                      user=username, domain=domain,
-                      ldapAttributeMailbox=self.proto.factory.config.getLDAPAttributeMailbox(),
-                      ldapAttributeMailHost=self.proto.factory.config.getLDAPAttributeMailHost(),
-                      dn=self.proto.factory.config.getDNForDomain(domain))
-
-        def _cbSearchCompleted(entries,
-                               root,
-                               user, domain,
-                               ldapAttributeMailHost):
-            if len(entries) < 1:
-                raise smtp.SMTPServerError, (451, 'User not found in LDAP: %s' % (
-                    user+'@'+domain))
-            if len(entries) > 1:
-                raise smtp.SMTPServerError, (
-                    451, 'LDAP content inconsistent, user matches multiple entries')
-            e = entries[0]
-            if ldapAttributeMailHost not in e:
+        def _cbGotBoxes(boxes,
+                        root,
+                        user, domain):
+            if not boxes:
                 raise smtp.SMTPBadRcpt, (
                     user+'@'+domain,
                     550,
                     'User is not served by any scalemail backend.')
-            boxes = e[ldapAttributeMailHost]
             for box in boxes:
                 if os.path.isdir(os.path.join(root, box)):
                     # this host serves this backend
@@ -320,10 +239,9 @@ class ScalemailDelivery(protocols.ESMTPDomainDelivery):
                 550,
                 'User is not served by this scalemail backend.')
 
-        d.addCallback(_cbSearchCompleted,
+        d.addCallback(_cbGotBoxes,
                       root=root,
-                      user=username, domain=domain,
-                      ldapAttributeMailHost=self.proto.factory.config.getLDAPAttributeMailHost())
+                      user=user.dest.local, domain=domain)
 
         def _setDomain(box, user):
             user.dest.domain = box + '.' + user.dest.domain
@@ -369,7 +287,7 @@ class ScalemailSMTPFactory(smtp.SMTPFactory):
         smtp.SMTPFactory.__init__(self, portal=None)
         self.spool=spool
         self.config=config
-        self.domain = self.domain + ' (Scalemail)'
+        self.domain = 'scalemail.%s'
 
 def calltrace():
     def printfuncnames(frame, event, dummy_arg):

@@ -3,7 +3,7 @@ I am the support module for running a Scalemail SMTP server with twistd --python
 """
 
 from twisted.internet import app
-from scalemail import smtp, config
+from scalemail import smtp, virtual, config
 from ldaptor import usage
 
 # TODO make Application accept string uid/gid.
@@ -18,3 +18,8 @@ prot = smtp.ScalemailSMTPFactory(
     config=cfg)
 
 application.listenTCP(cfg.getSMTPPort(), prot)
+
+prot = virtual.ScalemailVirtualMapFactory(cfg)
+
+application.listenTCP(cfg.getPostfixVirtualMapPort(), prot,
+                      interface = cfg.getPostfixVirtualMapInterface())

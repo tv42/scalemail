@@ -1,3 +1,26 @@
+scalemail (0.3) unstable; urgency=low
+
+  * Prefix the hostname with "scalemail." in the HELO string to
+    avoid false positive mail loop detection in Postfix.
+  * Improve the courier integration document:
+    - fix courier-ldap package name
+    - add scalemail-courier-login-mapper also to imapd/pop3d side
+      (need to split that functionality)
+    - add MAILDIR_FALLBACK to /etc/init.d/courier-pop as it
+      doesn't read /etc/courier/pop3d like the imap side does
+    - note that you need to customize LDAP_SERVER and LDAP_BASEDN
+      in /etc/courier/authldaprc
+    - set MAILDIR="." in /etc/default/courier, or it'll default
+      to "Maildir", which doesn't exist with scalemail
+    - be more explicit about restarting the daemons
+  * Add postfix virtual(5) map support.
+  * Add support for LDAP attributes scaleMailForward and
+    scaleMailForwardCopy, for listing addresses to forward email
+    for the account to. scaleMailForwardCopy does not suppress
+    local delivery, whereas scaleMailForward does.
+
+ -- Tommi Virtanen <tv@debian.org>  Wed,  6 Aug 2003 19:12:33 +0300
+
 scalemail (0.2) unstable; urgency=low
 
   * No longer depend on debconf.
