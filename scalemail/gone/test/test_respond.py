@@ -96,35 +96,8 @@ body
         r = respond.prepare(self.msg, reply)
         self.assertEquals(r.get_all('From'), ['me'])
 
-    def test_from_to(self):
-        """If gone message has no From: and original has To:, that is used."""
-        reply = email.message_from_string("""\
-Subject: precious
-
-body
-""")
-        r = respond.prepare(self.msg, reply, recipient='the-recipient')
-        self.assertEquals(r.get_all('From'), ['the-guy-on-vacation'])
-
-    def test_from_to_hiddenDoesNotFoolIt(self):
-        """To header with no addresses does not fool the responder."""
-        reply = email.message_from_string("""\
-Subject: precious
-
-body
-""")
-        msg = email.message_from_string("""\
-From the-sender
-To: undisclosed-recipients: ;
-Subject: question
-
-are you there?
-""")
-        r = respond.prepare(msg, reply, recipient='the-recipient')
-        self.assertEquals(r.get_all('From'), ['the-recipient'])
-
     def test_from_recipient(self):
-        """If gone message has no From: and original has no To:, envelope recipient is used."""
+        """If gone message has no From:, envelope recipient is used."""
         reply = email.message_from_string("""\
 Subject: precious
 

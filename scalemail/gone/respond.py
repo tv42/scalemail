@@ -49,12 +49,8 @@ def prepare(msg,
             subject = subjectPrefix + subject
         reply['Subject'] = subject
 
-    if 'From' not in reply:
-        to = email.Utils.getaddresses(msg.get_all('To', []))
-        to = [x for x in to if x != ('', '')]
-        if to:
-            reply['From'] = email.Utils.formataddr(to[0])
-        elif recipient is not None:
+    if ('From' not in reply
+        and recipient is not None):
             if '@' in recipient:
                 local, host = recipient.split('@', 1)
                 box, domain = util.host_split(host)
