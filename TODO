@@ -15,3 +15,7 @@
   - http://www.wossname.org.uk/~mathie/software/draft-lachman-ldap-mail-routing-03.txt
 
 * test #@[] as sender
+
+* needs twisted commit r12036 to have reliable autoresponder processing
+
+* needs twisted commit r12767 to be able to send responses from <>
