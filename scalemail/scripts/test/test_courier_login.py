@@ -98,11 +98,11 @@ scaleMailHost: h1
                                 authtype='login',
                                 authdata='fred@example.com\nflintstone')
         r = ldaptestutil.pumpingDeferredResult(d)
-        self.assertEquals(r, os.path.join(self.spool,
+        self.assertEquals(r, (os.path.join(self.spool,
                                           'example.com',
                                           'h1',
-                                          'fr',
-                                          'fred'))
+                                          'fr'),
+                              'fred'))
         self.assertEquals(env.get('AUTHENTICATED'),
                           'fred@example.com')
         self.assertEquals(env.get('MAILDIR'), '.')

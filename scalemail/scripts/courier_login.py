@@ -1,7 +1,8 @@
-import os, sys
+import os, sys, pwd, grp
 from twisted.internet import protocol, reactor, defer
 from twisted.cred import credentials, error
 from twisted.mail.maildir import initializeMaildir
+from twisted.python.util import switchUID
 from ldaptor import checkers
 from ldaptor import config as ldapconfig
 from ldaptor.protocols import pureldap
@@ -126,17 +127,9 @@ def cbLoggedIn(e, config, env):
                            mailhost,
                            userpad)
 
-    if not os.path.isdir(userdir):
-        os.mkdir(userdir, 0700)
-
-    maildir = os.path.join(userdir, username)
-
-    if not os.path.isdir(maildir):
-        initializeMaildir(maildir)
-
     env['MAILDIR'] = '.'
     env['AUTHENTICATED'] = mail
-    return maildir
+    return (userdir, username)
 
 EX_OK=0
 EX_TEMPFAIL=75
@@ -167,7 +160,19 @@ def run():
                      authtype=authtype,
                      authdata=authdata)
             r = util.wait(d, timeout=60.0)
-            os.chdir(r)
+            userdir, username = r
+
+            switchUID(uid=pwd.getpwnam('scalemail')[2],
+                      gid=grp.getgrnam('scalemail')[2])
+
+            if not os.path.isdir(userdir):
+                os.mkdir(userdir, 0700)
+            os.chdir(userdir)
+
+            if not os.path.isdir(username):
+                initializeMaildir(username)
+            os.chdir(username)
+
             os.execlp(sys.argv[1], *sys.argv[1:])
             die("Something is very wrong")
         except (error.UnauthorizedLogin,
