@@ -23,11 +23,12 @@
 * if gone message is multipart, attach original message; if not,
    textually insert at end of message
 
-* let gone message set header fields of outgoing messages; only strip
-   out X-Scalemail-* (make sure Message-Id is overwritten)
+* make sure gone message Message-Id header is overwritten
 
 * make respond.py subject sending only happen if gone message has no
    Subject header
 
 * make respond.py set From: to the original message To: (if any) or
    envelope recipient, but only if gone message has no From header.
+
+* if gone message body is empty, use a default message

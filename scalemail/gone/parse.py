@@ -39,10 +39,6 @@ def parse(s):
     for name in settings.keys():
         del e[HEADER_PREFIX+name]
 
-    msg = e.get_payload(decode=True)
-    if not msg:
-        msg = None
-
     return GoneInfo(interval=ival,
-                    message=msg,
+                    message=e,
                     settings=settings)

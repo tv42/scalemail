@@ -39,11 +39,13 @@ X-Scalemail-Subject-Prefix: add-a-prefix
         r = ldap.is_active(self.config, self.e, now)
         self.failIfIdentical(r, None)
         self.assertEquals(r.settings, {})
-        self.assertEquals(r.message, "foo\n")
+        self.assertEquals(r.message.as_string(unixfrom=False),
+                          "\nfoo\n")
 
     def test_active_2(self):
         now = datetime.date(2001, 2, 5)
         r = ldap.is_active(self.config, self.e, now)
         self.failIfIdentical(r, None)
         self.assertEquals(r.settings, {'subject-prefix': 'add-a-prefix'})
-        self.assertEquals(r.message, None)
+        self.assertEquals(r.message.as_string(unixfrom=False),
+                          "\n")
