@@ -1,4 +1,4 @@
-import sys
+import sys, sets
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEMessage import MIMEMessage
@@ -17,6 +17,12 @@ def _process(path, msg):
         return err
 
     # TODO check Delivered-To
+    seen = sets.Set()
+    for deliveredTo in msg.get_all('Delivered-To', []):
+        if deliveredTo in seen:
+            # duplicate Delivered-To -- loop detected
+            return "Message has duplicated Delivered-To line: %s" % deliveredTo
+        seen.add(deliveredTo)
 
     rate = ratedir.RateDir(world, path)
     sender = util.getSender(msg)
