@@ -1,9 +1,7 @@
 import os
-from zope.interface import implements
 from scalemail.gone import igone
 
 class RateDir(object):
-    implements(igone.IRateLimit)
 
     count = 1
     interval = 1*60*60
@@ -48,7 +46,9 @@ class RateDir(object):
 
     def tick(self, sender):
         """
-        Check sender rate
+        Add one message to rate tracking for sender at time now.
+
+        @raise RateExceededError: If rate limit would be exceeded.
 
         For each entry in directory listing:
         - split filename into TIMESTAMP, PID, ADDRESS parts

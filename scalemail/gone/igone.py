@@ -37,12 +37,3 @@ class RateExceededError(Exception):
 
     def __str__(self):
         return self.__doc__ % {'sender': self.sender}
-
-class IRateLimit(Interface):
-    def tick(self, sender):
-        """
-        Add one message to rate tracking for sender at time now.
-
-        @raise RateExceededError: If rate limit would be exceeded.
-        """
-        pass
