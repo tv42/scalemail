@@ -17,6 +17,7 @@ class ScalemailConfig:
             'ldap-attribute-mailquota': 'scaleMailQuota',
             'ldap-attribute-mailforward': 'scaleMailForward',
             'ldap-attribute-mailforwardcopy': 'scaleMailForwardCopy',
+            'ldap-attribute-alias': 'scaleMailAlias',
             'smtp-port': '8025',
             'recipient-delimiters': '+',
             'virtual-map-port': '8026',
@@ -49,6 +50,9 @@ class ScalemailConfig:
 
     def getLDAPAttributeMailForwardCopy(self):
         return self.config.get('Scalemail', 'ldap-attribute-mailforwardcopy')
+
+    def getLDAPAttributeAlias(self):
+        return self.config.get('Scalemail', 'ldap-attribute-alias')
 
     def getRecipientDelimiters(self):
         return self.config.get('Scalemail', 'recipient-delimiters')
