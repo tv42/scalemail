@@ -1,3 +1,16 @@
+scalemail (0.15) unstable; urgency=low
+
+  * Add scalemail-courier-login, for Courier-IMAP integration without the
+    need to patch courier-authdaemon. It currently does not support
+    chaining with other authentication modules, it must be used alone.
+    Depend on ldaptor >= 0.0.35 to have a working password checker.
+  * Do not use time.mktime so there is no year 2038 problem.
+  * Remove duplicated attributeType in scalemail.schema that came from two
+    consecutive typos.
+  * Bump standards version to 3.6.1.
+
+ -- Tommi Virtanen <tv@debian.org>  Fri, 28 Jan 2005 21:07:20 +0200
+
 scalemail (0.14) unstable; urgency=low
 
   * Depend on python2.3-zopeinterface, it's not really required but this
