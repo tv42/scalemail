@@ -3,6 +3,7 @@ from twisted.internet import defer
 import datetime
 from ldaptor import entry
 from scalemail.gone import ldap
+from scalemail.test import test_util
 
 class FakeConnectedLDAPEntry(entry.BaseLDAPEntry):
     def fetch(self, *attributes):
@@ -26,22 +27,23 @@ foo
 Subject: add-a-prefix
 """],
             })
+        self.config = test_util.ConfigDriver('/foo', {})
         
     def test_inactive(self):
         now = datetime.date(2001, 1, 31)
-        r = ldap.is_active(self.e, now)
+        r = ldap.is_active(self.config, self.e, now)
         self.assertEquals(r, None)
 
     def test_active_1(self):
         now = datetime.date(2001, 2, 2)
-        r = ldap.is_active(self.e, now)
+        r = ldap.is_active(self.config, self.e, now)
         self.failIfIdentical(r, None)
         self.assertEquals(r.settings, {})
         self.assertEquals(r.message, "foo\n")
 
     def test_active_2(self):
         now = datetime.date(2001, 2, 5)
-        r = ldap.is_active(self.e, now)
+        r = ldap.is_active(self.config, self.e, now)
         self.failIfIdentical(r, None)
         self.assertEquals(r.settings, {'Subject': 'add-a-prefix'})
         self.assertEquals(r.message, None)

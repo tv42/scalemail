@@ -137,7 +137,7 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
 
                 ]),
                        typesOnly=1,
-                       attributes=['scaleMailAway'],
+                       attributes=[self.config.getLDAPAttributeAway()],
                        sizeLimit=1)
 
             def _unbind(entries, proto):
