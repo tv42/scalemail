@@ -54,7 +54,16 @@ class AccountExistsGetter(util.AccountGetter):
         else:
             l = []
             for e in alias:
-                l.extend(e[ldapAttributeMailbox])
+                for address in e[ldapAttributeMailbox]:
+                    local, host = address.split('@', 1)
+                    user, folder = util.addr_split(
+                        local, 
+                        self.config.getRecipientDelimiters())
+                    if folder is None:
+                        folder = self.folder
+                    newAddress = util.addr_join(user, folder, host,
+                                                self.config.getRecipientDelimiters())
+                    l.append(newAddress)
             return l
 
 def scalemailMapper(config, local, domain):

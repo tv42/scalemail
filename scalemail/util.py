@@ -47,6 +47,22 @@ def addr_split(addr, recipientDelimiters):
             break
     return (user, folder)
 
+def addr_join(user, folder, host, recipientDelimiter):
+    """
+    Join user, folder and host to an email address.
+
+    @param folder: folder name or None for no folder.
+
+    @param recipientDelimiter: string of recipient delimiter
+    characters, only the first one will be used.
+    """
+    local = user
+    if folder is not None:
+        local = (local
+                 + recipientDelimiter[0]
+                 + folder)
+    return local+'@'+host
+
 class ScaleMailAccountSearchError(Exception):
     """An error occurred during LDAP search for the account."""
 
@@ -72,8 +88,7 @@ class AccountGetter(object):
         if clientFactory is not None:
             self.clientFactory = clientFactory
         self.domain = domain
-        username, folder = addr_split(local, self.config.getRecipientDelimiters())
-        self.user = username
+        self.user, self.folder = addr_split(local, self.config.getRecipientDelimiters())
 
     def _connect(self):
         dn = self.config.getDNForDomain(self.domain)
