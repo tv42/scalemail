@@ -50,7 +50,6 @@ class AutoRespondMessage(object):
             # will most often be empty
             self.wrapped.fp.flush()
             f = open(self.wrapped.name)
-            f.seek(0)
             msg = email.message_from_file(f)
             f.close()
             goneutil.setSender(msg, self.user.orig)
