@@ -24,7 +24,7 @@ class ConfigDriver(config.ScalemailConfig):
 
 def _overrideConnect(factory):
     class LDAPServerThatFailsSearches(ldapserver.LDAPServer):
-        def handle_LDAPSearchRequest(self, request, reply):
+        def handle_LDAPSearchRequest(self, request, controls, reply):
             return defer.succeed(
                 pureldap.LDAPSearchResultDone(resultCode=ldaperrors.LDAPOther.resultCode,
                                               errorMessage='just testing'))
