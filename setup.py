@@ -23,6 +23,8 @@ Python and Twisted.
 
 	  packages=[
 	"scalemail",
+        "scalemail.scripts",
+        "scalemail.scripts.test",
 	"scalemail.test",
         "scalemail.mapper",
         "scalemail.gone",
@@ -34,6 +36,7 @@ Python and Twisted.
                        ["scalemail.schema"]),
                       ('/usr/lib/courier/authlib',
                        ["scalemail-courier-login-mapper",
+                        "scalemail-courier-login",
                         "scalemail-courier-map-percent-to-at"]),
                       (os.path.join(get_python_lib(), 'scalemail'),
                        ["scalemail/plugins.tml"]),

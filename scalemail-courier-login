@@ -1,0 +1,4 @@
+#!/usr/bin/python2.3
+
+from scalemail.scripts import courier_login
+courier_login.run()
