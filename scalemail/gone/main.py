@@ -6,7 +6,7 @@ from twisted.internet import defer
 from twisted.protocols import smtp
 from scalemail.gone import igone, blacklist, ratedir, util
 
-def _process(path, msg):
+def _shouldProcess(path, msg):
     """
     @todo: rate, interval configuration
     """
@@ -30,10 +30,15 @@ def _process(path, msg):
     except igone.RateExceededError, e:
         return "Sender has sent too many messages"
 
+    return False
+
+def _prepare(msg,
+             content,
+             subjectPrefix=None):
     reply = MIMEMultipart()
+    sender = util.getSender(msg)
     reply['To'] = sender
 
-    subjectPrefix = None # TODO make configurable
     subject = msg['Subject']
     if subject is None:
         subject = 'Your mail'
@@ -46,18 +51,43 @@ def _process(path, msg):
         msgid = msgid.strip()
         reply['In-Reply-To'] = msgid
 
-    reply.attach(MIMEText('foo'.encode('utf-8'), _charset='utf-8'))
+    reply.attach(MIMEText(content.encode('utf-8'), _charset='utf-8'))
     reply.attach(MIMEMessage(msg))
+    return reply
     
-    d = smtp.sendmail('127.0.0.1',
-                      'TODO-set-from-here',
-                      [sender],
-                      reply)
+def _send(msg, smtpHost, sender, recipient):
+    d = smtp.sendmail(smtpHost,
+                      sender,
+                      [recipient],
+                      msg)
     d.addCallback(lambda _ : False)
     return d
 
+def _process(path,
+             msg,
+             replyContent,
+             sender,
+             subjectPrefix=None,
+             smtpHost=None,
+             ):
+    if smtpHost is None:
+        smtpHost = '127.0.0.1'
+    d = defer.maybeDeferred(_shouldProcess, path, msg)
+    def _cb(r, msg):
+        if r:
+            return r
+        d = defer.maybeDeferred(_prepare, msg,
+                                content=replyContent,
+                                subjectPrefix=None)
+        d.addCallback(_send,
+                      smtpHost=smtpHost,
+                      sender=sender,
+                      recipient=util.getSender(msg))
+        return d
+    d.addCallback(_cb, msg)
+    return d
 
-def process(path, msg):
+def process(*a, **kw):
     """
     @return: An object that is true if message was not autoreplied
     to. Otherwise, it is non-true. If it is true, it can be
@@ -65,4 +95,4 @@ def process(path, msg):
 
     @rtype: Deferred
     """
-    return defer.maybeDeferred(_process, path, msg)
+    return defer.maybeDeferred(_process, *a, **kw)
