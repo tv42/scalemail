@@ -1,3 +1,15 @@
+scalemail (0.9.trunk.36) unstable; urgency=low
+
+  * Support for alias addresses, set scaleMailAlias attribute to
+    any email addresses you want to function as aliases for the
+    current account. Config field ldap-attribute-alias sets
+    the attribute name.
+  * Schema: allow using the scaleMailForward and scaleMailForwardCopy
+    attributes in scaleMailAccount LDAP objects.
+  * Depend on ldaptor 0.0.30.
+
+ -- Tommi Virtanen <tv@debian.org>  Fri, 12 Nov 2004 12:16:48 +0200
+
 scalemail (0.9) unstable; urgency=low
 
   * New dia uploaded to unstable
