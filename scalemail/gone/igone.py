@@ -17,17 +17,6 @@ class IRealWorld(Interface):
         """
         pass
 
-class IMessage(Interface):
-    def getMessage(self):
-        """
-        @return: The message.
-        @rtype: email.Message
-
-        The envelope sender, as gettable with .get_unixfrom(), _must_
-        be set.
-        """
-        pass
-
 class RateExceededError(Exception):
     """Sender %(sender)s rate limit exceeded"""
 
