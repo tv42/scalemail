@@ -198,16 +198,28 @@ def run():
         authtype = authfile.readline().rstrip()
         authdata = authfile.read()
         authfile.close()
-        d = main(config=cfg,
-                 argv=sys.argv,
-                 env=os.environ,
-                 service=service,
-                 authtype=authtype,
-                 authdata=authdata)
-        r = util.deferredResult(d)
-        os.chdir(r)
-        os.execlp(sys.argv[1], *sys.argv[1:])
-        die("Something is very wrong")
+        try:
+            d = main(config=cfg,
+                     argv=sys.argv,
+                     env=os.environ,
+                     service=service,
+                     authtype=authtype,
+                     authdata=authdata)
+            r = util.wait(d)
+            os.chdir(r)
+            os.execlp(sys.argv[1], *sys.argv[1:])
+            die("Something is very wrong")
+        except ChainLogin:
+            os.execlp(sys.argv[1], *sys.argv[1:])
+            die("Something is very wrong")
+        except RetryLogin:
+            l = []
+
+            argc = int(os.environ['AUTHARGC'])
+            for i in range(argc):
+                l.append(os.environ['AUTHARGV%d' % i])
+            os.execlp(*l)
+            die("Something is very wrong")
     except SystemExit:
         raise
     except:
