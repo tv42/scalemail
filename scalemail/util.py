@@ -62,35 +62,39 @@ class ScaleMailAccountMultipleEntries(ScaleMailAccountSearchError):
 class AccountGetter(object):
     clientFactory = ldapclient.LDAPClient
 
-    def __init__(self, config, clientFactory=None, *a, **kw):
+    def __init__(self,
+                 config,
+                 local, domain,
+                 clientFactory=None,
+                 *a, **kw):
         super(AccountGetter, self).__init__(*a, **kw)
         self.config = config
         if clientFactory is not None:
             self.clientFactory = clientFactory
+        self.domain = domain
+        username, folder = addr_split(local, self.config.getRecipientDelimiters())
+        self.user = username
 
-    def _connect(self, domain):
-        dn = self.config.getDNForDomain(domain)
+    def _connect(self):
+        dn = self.config.getDNForDomain(self.domain)
         c = ldapconnector.LDAPClientCreator(reactor, self.clientFactory)
         d = c.connectAnonymously(dn, self.config.getServiceLocationOverride())
         return d
 
-    def _fetch(self,
-               proto,
-               user, domain,
-               ldapAttributeMailbox,
-               ldapAttributeMailHost,
-               dn):
+    def _fetch(self, proto):
+        dn = self.config.getDNForDomain(self.domain)
         o = ldapsyntax.LDAPEntry(client=proto, dn=dn)
+        ldapAttributeMailbox=self.config.getLDAPAttributeMailbox()
         d=o.search(filterObject=pureldap.LDAPFilter_equalityMatch(
             attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
-            assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)))
+            assertionValue=pureldap.LDAPAssertionValue(self.user+'@'+self.domain)))
 
-        def _unbind(r, proto):
-            proto.unbind()
-            return r
-        d.addBoth(_unbind, proto)
-
+        d.addBoth(self._unbind, proto)
         return d
+
+    def _unbind(self, r, proto):
+        proto.unbind()
+        return r
 
     def _searchCompleted(self, entries):
         if len(entries) < 1:
@@ -100,25 +104,20 @@ class AccountGetter(object):
         e = entries[0]
         return e
 
-    def getAccount(self, local, domain):
+    def getAccount(self):
         """
         Get the LDAPEntry for this account.
         """
-        username, folder = addr_split(local, self.config.getRecipientDelimiters())
-
-        d = self._connect(domain)
-        d.addCallback(self._fetch,
-                      user=username, domain=domain,
-                      ldapAttributeMailbox=self.config.getLDAPAttributeMailbox(),
-                      ldapAttributeMailHost=self.config.getLDAPAttributeMailHost(),
-                      dn=self.config.getDNForDomain(domain))
+        d = self._connect()
+        d.addCallback(self._fetch)
         d.addCallback(self._searchCompleted)
         return d
 
 def getAccount(config, local, domain,
                clientFactory=None):
-    f = AccountGetter(config, clientFactory=clientFactory)
-    return f.getAccount(local, domain)
+    f = AccountGetter(config, local, domain,
+                      clientFactory=clientFactory)
+    return f.getAccount()
 
 def getBoxes(entry, config):
     """
