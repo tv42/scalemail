@@ -37,6 +37,7 @@ def _shouldProcess(path, msg):
 def prepare(msg,
             reply,
             recipient=None,
+            recipientName=None,
             subjectPrefix=None):
     sender = goneutil.getSender(msg)
     reply['To'] = sender
@@ -57,7 +58,7 @@ def prepare(msg,
                 if domain is not None:
                     host = domain
                 recipient = str(smtp.Address(local, host))
-            reply['From'] = recipient
+            reply['From'] = email.Utils.formataddr((recipientName, recipient))
 
     msgid = msg.get('Message-ID', None)
     if msgid is not None:

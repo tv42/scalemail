@@ -24,6 +24,11 @@ def mailfoldermake(dir):
 def _user_prefix(username):
     return (username[:2]+"__")[:2]
 
+def getName(cfg, entry):
+    for name in entry.get(cfg.getLDAPAttributeFullName(), []):
+        return name
+    return None
+
 class AutoRespondMessage(object):
     __implements__ = smtp.IMessage,
 
@@ -59,6 +64,7 @@ class AutoRespondMessage(object):
                 msg=msg,
                 sender='',
                 recipient=str(self.user),
+                recipientName=getName(self.config, self.user.ldapEntry),
                 goneInfo=gone,
                 #TODO smtpHost
                 )
@@ -206,7 +212,8 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
                 assertionValue=pureldap.LDAPAssertionValue(box)),
 
                 ]),
-                       attributes=[self.config.getLDAPAttributeAway()],
+                       attributes=[self.config.getLDAPAttributeAway(),
+                                   self.config.getLDAPAttributeFullName()],
                        sizeLimit=1)
 
             def _unbind(entries, proto):

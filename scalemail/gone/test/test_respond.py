@@ -127,3 +127,22 @@ are you there?
 """)
         r = respond.prepare(msg, reply, recipient='the-recipient@somehost.scalemail.foo.example.com')
         self.assertEquals(r.get_all('From'), ['the-recipient@foo.example.com'])
+
+    def test_from_recipient_withName(self):
+        """If recipient name is given, it is used in From:."""
+        reply = email.message_from_string("""\
+Subject: precious
+
+body
+""")
+        msg = email.message_from_string("""\
+From the-sender
+Subject: question
+
+are you there?
+""")
+        r = respond.prepare(msg, reply,
+                            recipient='the-recipient',
+                            recipientName='Jack Recipient',
+                            )
+        self.assertEquals(r.get_all('From'), ['Jack Recipient <the-recipient>'])
