@@ -137,7 +137,7 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
 
                 ]),
                        typesOnly=1,
-                       attributes=['objectClass'], #TODO how to specify no attributes wanted
+                       attributes=['scaleMailAway'],
                        sizeLimit=1)
 
             def _unbind(entries, proto):
