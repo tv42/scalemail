@@ -4,13 +4,15 @@ from email.MIMEMessage import MIMEMessage
 import email.Utils
 from twisted.internet import defer
 from twisted.protocols import smtp
-from scalemail.gone import igone, blacklist, ratedir, util
+from scalemail.gone import igone, blacklist, ratedir
+from scalemail.gone import util as goneutil
+from scalemail import util
 
 def _shouldProcess(path, msg):
     """
     @todo: rate, interval configuration
     """
-    world = util.RealWorld()
+    world = goneutil.RealWorld()
 
     err = blacklist.isBlacklist(msg)
     if err:
@@ -24,7 +26,7 @@ def _shouldProcess(path, msg):
         seen.add(deliveredTo)
 
     rate = ratedir.RateDir(world, path)
-    sender = util.getSender(msg)
+    sender = goneutil.getSender(msg)
     try:
         rate.tick(sender)
     except igone.RateExceededError:
@@ -36,7 +38,7 @@ def prepare(msg,
             reply,
             recipient=None,
             subjectPrefix=None):
-    sender = util.getSender(msg)
+    sender = goneutil.getSender(msg)
     reply['To'] = sender
 
     if 'Subject' not in reply:
@@ -53,6 +55,12 @@ def prepare(msg,
         if to:
             reply['From'] = email.Utils.formataddr(to[0])
         elif recipient is not None:
+            if '@' in recipient:
+                local, host = recipient.split('@', 1)
+                box, domain = util.host_split(host)
+                if domain is not None:
+                    host = domain
+                recipient = str(smtp.Address(local, host))
             reply['From'] = recipient
 
     msgid = msg.get('Message-ID', None)
@@ -92,7 +100,7 @@ def _process(path,
         d.addCallback(_send,
                       smtpHost=smtpHost,
                       sender=sender,
-                      recipient=util.getSender(msg))
+                      recipient=goneutil.getSender(msg))
         return d
     d.addCallback(_cb, msg)
     return d

@@ -138,3 +138,19 @@ are you there?
 """)
         r = respond.prepare(msg, reply, recipient='the-recipient')
         self.assertEquals(r.get_all('From'), ['the-recipient'])
+
+    def test_from_recipient_scalemail(self):
+        """Even if recipient has scalemail box in its domain, From header doesn't."""
+        reply = email.message_from_string("""\
+Subject: precious
+
+body
+""")
+        msg = email.message_from_string("""\
+From the-sender
+Subject: question
+
+are you there?
+""")
+        r = respond.prepare(msg, reply, recipient='the-recipient@somehost.scalemail.foo.example.com')
+        self.assertEquals(r.get_all('From'), ['the-recipient@foo.example.com'])
