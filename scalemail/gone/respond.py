@@ -65,9 +65,8 @@ def _send(msg, smtpHost, sender, recipient):
 
 def _process(path,
              msg,
-             replyContent,
              sender,
-             subjectPrefix=None,
+             goneInfo,
              smtpHost=None,
              ):
     if smtpHost is None:
@@ -77,8 +76,8 @@ def _process(path,
         if r:
             return r
         d = defer.maybeDeferred(_prepare, msg,
-                                content=replyContent,
-                                subjectPrefix=None)
+                                content=goneInfo.message,
+                                subjectPrefix=goneInfo.settings.get('Subject', None))
         d.addCallback(_send,
                       smtpHost=smtpHost,
                       sender=sender,
