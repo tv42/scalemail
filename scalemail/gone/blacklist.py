@@ -17,8 +17,7 @@ def isBadSender(sender):
         return "Sender is <#@[]> (double bounce message)"
     if '@' not in sender:
         return "Sender did not contain a hostname"
-    if (sender.lower() == 'mailer-daemon'
-        or sender.lower().startswith('mailer-daemon@')):
+    if sender.lower().startswith('mailer-daemon@'):
         return "Sender was mailer-daemon"
     return False
 

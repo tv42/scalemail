@@ -25,4 +25,48 @@ From: thud@quux
 Subject: bounce
 ''')
 
-    # TODO write more tests
+    def test_doublebounce(self):
+        self.check('Sender is <#@[]> (double bounce message)',
+                   '#@[]', '''\
+From: thud@quux
+Subject: bounce
+''')
+
+    def test_localonly(self):
+        self.check('Sender did not contain a hostname',
+                   'foo', '''\
+From: thud@quux
+Subject: bounce
+''')
+
+    def test_mailerDaemon(self):
+        self.check('Sender was mailer-daemon',
+                   'mailer-daemon@foo', '''\
+From: thud@quux
+Subject: bounce
+''')
+        self.check('Sender was mailer-daemon',
+                   'mailer-DAEMON@foo', '''\
+From: thud@quux
+Subject: bounce
+''')
+        self.ok('mailer-DAEMONs-best-buddy@something', '''\
+From: thud@quux
+Subject: pass
+''')
+
+    def test_mailingList(self):
+        self.check('Message appears to be from a mailing list (List-ID header)',
+                   'foo@bar', '''\
+From: thud@quux
+LIST-id: foo
+Subject: bounce
+''')
+
+    def test_precedence_bulk(self):
+        self.check('Message has a junk, bulk, or list precedence header',
+                   'foo@bar', '''\
+From: thud@quux
+Precedence: bulk or something
+Subject: bounce
+''')
