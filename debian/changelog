@@ -1,3 +1,9 @@
+scalemail (0.11) unstable; urgency=low
+
+  * Make address extensions pass through alias rewriting.
+
+ -- Tommi Virtanen <tv@debian.org>  Tue, 21 Dec 2004 14:31:23 +0200
+
 scalemail (0.10) unstable; urgency=low
 
   * Support for alias addresses, set scaleMailAlias attribute to
