@@ -126,3 +126,73 @@ class Compare(unittest.TestCase):
         t1 = times.TimeInterval.fromString(s1)
         t2 = times.TimeInterval.fromString(s2)
         self.failIf(t1 != t2)
+
+class Intersection(unittest.TestCase):
+    """
+	other  |---|
+	1 |---|.   .
+	2  |---|   .
+	3   |---|  .
+        4      |-| .
+        5      .|-|.
+        6      |---|
+        7      . |-|
+        8      . |---|
+        9      .   |---|
+        10     .   . |---|
+        11   |-------|
+    """
+    def setUp(self):
+        self.me = times.TimeInterval.fromString(
+            '2005-01-09T01:02:03 2005-01-09T03:02:03')
+
+    def check(self, other, want):
+        other = times.TimeInterval.fromString(other)
+        if want is not None:
+            want = times.TimeInterval.fromString(want)
+        got = self.me & other
+        self.assertEquals(got, want)
+
+    def test_1(self):
+        self.check(other='2005-01-09T00:05:00 2005-01-09T01:00:00',
+                   want=None)
+
+    def test_2(self):
+        self.check(other='2005-01-09T00:05:00 2005-01-09T01:02:03',
+                   want='2005-01-09T01:02:03 2005-01-09T01:02:03')
+
+    def test_3(self):
+        self.check(other='2005-01-09T00:05:00 2005-01-09T01:03:03',
+                   want='2005-01-09T01:02:03 2005-01-09T01:03:03')
+
+    def test_4(self):
+        self.check(other='2005-01-09T01:02:03 2005-01-09T02:00:00',
+                   want='2005-01-09T01:02:03 2005-01-09T02:00:00')
+
+    def test_5(self):
+        self.check(other='2005-01-09T01:30:00 2005-01-09T02:00:00',
+                   want='2005-01-09T01:30:00 2005-01-09T02:00:00')
+
+    def test_6(self):
+        self.check(other='2005-01-09T01:02:03 2005-01-09T03:02:03',
+                   want='2005-01-09T01:02:03 2005-01-09T03:02:03')
+
+    def test_7(self):
+        self.check(other='2005-01-09T02:02:03 2005-01-09T03:02:03',
+                   want='2005-01-09T02:02:03 2005-01-09T03:02:03')
+
+    def test_8(self):
+        self.check(other='2005-01-09T02:02:03 2005-01-09T04:02:03',
+                   want='2005-01-09T02:02:03 2005-01-09T03:02:03')
+
+    def test_9(self):
+        self.check(other='2005-01-09T03:02:03 2005-01-09T04:02:03',
+                   want='2005-01-09T03:02:03 2005-01-09T03:02:03')
+
+    def test_10(self):
+        self.check(other='2005-01-09T05:02:03 2005-01-09T06:02:03',
+                   want=None)
+
+    def test_11(self):
+        self.check(other='2004-01-01 2006-01-01',
+                   want='2005-01-09T01:02:03 2005-01-09T03:02:03')

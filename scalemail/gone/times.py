@@ -86,6 +86,22 @@ class TimeInterval(object):
         else:
             return False
 
+    def __and__(self, other):
+        """Intersection of two times.
+
+        @return: The intersection or None if the intervals do not
+        intersect.
+
+        @rtype: TimeInterval or None
+        """
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        start = max(self.start, other.start)
+        stop = min(self.stop, other.stop)
+        if start > stop:
+            return None
+        return self.__class__(start, stop)
 
 def findTime(now, times):
     for interval in times:
