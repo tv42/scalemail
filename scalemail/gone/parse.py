@@ -19,14 +19,8 @@ class GoneInfo(object):
 
 HEADER_PREFIX = 'x-scalemail-'
 
-def parse(s):
-    f = StringIO(s)
-    firstLine = f.readline()
-    # chomp out any line endings, no matter what kind
-    firstLine = firstLine.splitlines()[0]
-    ival = times.TimeInterval.fromString(firstLine)
-
-    e = email.message_from_file(f)
+def parseMessage(fp):
+    e = email.message_from_file(fp)
 
     settings = {}
     for k,v in e.items():
@@ -37,6 +31,16 @@ def parse(s):
     for name in settings.keys():
         del e[HEADER_PREFIX+name]
 
+    return (e, settings)
+
+def parse(s):
+    f = StringIO(s)
+    firstLine = f.readline()
+    # chomp out any line endings, no matter what kind
+    firstLine = firstLine.splitlines()[0]
+    ival = times.TimeInterval.fromString(firstLine)
+
+    (msg, settings) = parseMessage(f)
     return GoneInfo(interval=ival,
-                    message=e,
+                    message=msg,
                     settings=settings)
