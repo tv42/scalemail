@@ -2,8 +2,6 @@
 
 * file bug on postfix.deb to remove scalemail-backend from master.cf
 
-* support aliases!
-
 * make twisted DNS SRV "climb up the domain" -> foo.bar.example.com,
    bar.example.com, example.com, com
 
