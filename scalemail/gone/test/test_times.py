@@ -68,10 +68,9 @@ class Stringify(unittest.TestCase):
 
     def test_day(self):
         orig = '2001-02-01 2001-02-01'
-        want = '2001-02-01T00:00:00 2001-02-01T00:00:00'
         t = times.TimeInterval.fromString(orig)
         got = str(t)
-        self.assertEquals(got, want)
+        self.assertEquals(got, orig)
 
 class Compare(unittest.TestCase):
     def test_equal_different(self):
