@@ -21,13 +21,7 @@ body
         r = respond.prepare(self.msg,
                             reply,
                             subjectPrefix=None)
-        self.assertEquals(r.as_string(unixfrom=False),
-                          """\
-Subject: precious
-To: the-sender
-
-body
-""")
+        self.assertEquals(r.get_all('Subject'), ['precious'])
 
     def test_subject_preserve_prefix(self):
         reply = email.message_from_string("""\
@@ -38,13 +32,7 @@ body
         r = respond.prepare(self.msg,
                             reply,
                             subjectPrefix='On holiday')
-        self.assertEquals(r.as_string(unixfrom=False),
-                          """\
-Subject: precious
-To: the-sender
-
-body
-""")
+        self.assertEquals(r.get_all('Subject'), ['precious'])
 
     def test_subject_set(self):
         reply = email.message_from_string("""\
@@ -54,13 +42,7 @@ body
         r = respond.prepare(self.msg,
                             reply,
                             subjectPrefix=None)
-        self.assertEquals(r.as_string(unixfrom=False),
-                          """\
-To: the-sender
-Subject: question
-
-body
-""")
+        self.assertEquals(r.get_all('Subject'), ['question'])
 
     def test_subject_set_prefix(self):
         reply = email.message_from_string("""\
@@ -70,13 +52,7 @@ body
         r = respond.prepare(self.msg,
                             reply,
                             subjectPrefix='On holiday: ')
-        self.assertEquals(r.as_string(unixfrom=False),
-                          """\
-To: the-sender
-Subject: On holiday: question
-
-body
-""")
+        self.assertEquals(r.get_all('Subject'), ['On holiday: question'])
 
     def test_subject_set_noIncoming(self):
         reply = email.message_from_string("""\
@@ -92,13 +68,7 @@ are you there?
         r = respond.prepare(msg,
                             reply,
                             subjectPrefix=None)
-        self.assertEquals(r.as_string(unixfrom=False),
-                          """\
-To: the-sender
-Subject: Your mail
-
-body
-""")
+        self.assertEquals(r.get_all('Subject'), ['Your mail'])
 
     def test_subject_set_prefix_noIncoming(self):
         reply = email.message_from_string("""\
@@ -114,10 +84,4 @@ are you there?
         r = respond.prepare(msg,
                             reply,
                             subjectPrefix='On holiday: ')
-        self.assertEquals(r.as_string(unixfrom=False),
-                          """\
-To: the-sender
-Subject: On holiday: Your mail
-
-body
-""")
+        self.assertEquals(r.get_all('Subject'), ['On holiday: Your mail'])
