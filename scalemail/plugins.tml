@@ -1,0 +1,17 @@
+# -*- python -*-
+
+register("Forward mapper",
+         "scalemail.mapper.forward",
+         description="""
+         scaleMailForward processing
+	 """,
+	 type="Scalemail.mapper.virtual.post",
+         )
+
+register("Backend box chooser",
+         "scalemail.mapper.box",
+         description="""
+         Does the default Scalemail address rewriting.
+	 """,
+	 type="Scalemail.mapper.virtual.post",
+         )

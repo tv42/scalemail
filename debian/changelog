@@ -1,3 +1,11 @@
+scalemail (0.4) unstable; urgency=low
+
+  * Use Twisted plugins for the Postfix virtual address rewriting,
+    allowing site-specific customizations without touching the
+    source code here.
+
+ -- Tommi Virtanen <tv@debian.org>  Thu,  7 Aug 2003 19:04:29 +0300
+
 scalemail (0.3) unstable; urgency=low
 
   * Prefix the hostname with "scalemail." in the HELO string to

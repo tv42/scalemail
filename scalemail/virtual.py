@@ -1,6 +1,7 @@
 import os
 from twisted.protocols import postfix
-from twisted.internet import protocol
+from twisted.internet import protocol, defer
+from twisted.python import plugin
 from scalemail import util
 
 class ScalemailVirtualMapImpossibleDomain(Exception):
@@ -65,25 +66,53 @@ class ScalemailVirtualMapFactory(protocol.ServerFactory):
                 # no need to rewrite, claim it's not found
                 return None
 
-            # local@scalemail.example.com
-            # -> local@box.scalemail.example.com
-            d = util.getAccount(self.config, local, domain)
+            d = self.callMappers('pre',
+                                 config=self.config,
+                                 local=local,
+                                 domain=domain)
+            def _afterPreMappers(answer, callMappers, config, local, domain):
+                if answer is not None:
+                    return answer
+                d = util.getAccount(config, local, domain)
 
-            def _gotAccount(account, config, local, domain):
-                fwd = []
-                fwd.extend(account.get(config.getLDAPAttributeMailForward(), []))
-                if not fwd:
-                    box = util.getRandomBox(account, config)
-                    if box is not None:
-                        fwd.append(local + '@' + box + '.scalemail.' + domain)
-                fwd.extend(account.get(config.getLDAPAttributeMailForwardCopy(), []))
-                if not fwd:
-                    return None
-                return ', '.join(fwd)
+                def _gotAccount(account, callMappers, *a, **kw):
+                    d = callMappers('post', account=account, *a, **kw)
+                    return d
+                d.addCallback(_gotAccount, callMappers, config=self.config, local=local, domain=domain)
+                return d
+            d.addCallback(_afterPreMappers, self.callMappers, self.config, local, domain)
 
-            d.addCallback(_gotAccount, self.config, local, domain)
+            def _joinAnswer(answer):
+                if answer is not None:
+                    answer = ', '.join(answer)
+                return answer
+            d.addCallback(_joinAnswer)
+
             def _fail(fail):
                 fail.trap(util.ScaleMailAccountNotFound)
                 return None
             d.addErrback(_fail)
             return d
+
+    def getMappers(self, key):
+        mappers = []
+        for plug in plugin.getPlugIns('Scalemail.mapper.virtual.%s' % key):
+            module = plug.load()
+            mapper = getattr(module, 'scalemailMapper')
+            pri = getattr(mapper, 'priority', 50)
+            mappers.append((pri, mapper))
+        mappers.sort()
+        return [mapper for (pri, mapper) in mappers]
+
+    def callMappers(self, key, *a, **kw):
+        def _callMapperIfNoAnswer(answer, mapper, *a, **kw):
+            if answer is not None:
+                return answer
+            else:
+                return mapper(*a, **kw)
+
+        d = defer.Deferred()
+        for mapper in self.getMappers(key):
+            d.addCallback(_callMapperIfNoAnswer, mapper, *a, **kw)
+        d.callback(None)
+        return d

@@ -23,6 +23,7 @@ Python and Twisted.
 
 	  packages=[
 	"scalemail",
+        "scalemail.mapper",
 	],
           data_files=[('/etc/scalemail',
                        ["scalemail.conf"]),
