@@ -16,7 +16,6 @@ def _process(path, msg):
     if err:
         return err
 
-    # TODO check Delivered-To
     seen = sets.Set()
     for deliveredTo in msg.get_all('Delivered-To', []):
         if deliveredTo in seen:
