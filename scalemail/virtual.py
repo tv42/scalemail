@@ -36,6 +36,12 @@ class ScalemailVirtualMapFactory(protocol.ServerFactory):
         if '@' not in key:
             box, domain = util.host_split(key)
 
+            if box is not None:
+                # box.scalemail.example.com
+                # tell postfix this isn't a virtual domain,
+                # so it will obey transports
+                return
+
             # example.com or scalemail.example.com
             if domain is None:
                 # example.com

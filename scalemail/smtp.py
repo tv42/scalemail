@@ -139,6 +139,12 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
                        typesOnly=1,
                        attributes=['objectClass'], #TODO how to specify no attributes wanted
                        sizeLimit=1)
+
+            def _unbind(entries, proto):
+                proto.unbind()
+                return entries
+            d.addCallback(_unbind, proto)
+
             return d
 
         d.addCallback(_search,

@@ -1,3 +1,12 @@
+scalemail (0.6) unstable; urgency=low
+
+  * Make sure to close LDAP server connections.
+  * In Postfix virtual map support, don't flag
+    "box.scalemail.example.com" as a virtual domain, so Postfix
+    will honour transports.
+
+ -- Tommi Virtanen <tv@debian.org>  Thu,  7 Aug 2003 21:02:27 +0300
+
 scalemail (0.5) unstable; urgency=low
 
   * Add the missing plugins.tml file to the package.

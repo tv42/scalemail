@@ -87,6 +87,12 @@ def getAccount(config, local, domain):
         d=o.search(filterObject=pureldap.LDAPFilter_equalityMatch(
             attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
             assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)))
+
+        def _unbind(entries, proto):
+            proto.unbind()
+            return entries
+        d.addCallback(_unbind, proto)
+
         return d
 
     d.addCallback(_fetch,

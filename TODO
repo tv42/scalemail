@@ -5,6 +5,8 @@
    scalemail.example.com	smtp:scalemail.example.com:8025
    .scalemail.example.com	smtp:scalemail.example.com:8025
 
+* init script is buggy when the pid file is missing
+
 * file bug on postfix.deb to remove scalemail-backend from master.cf
 
 * support aliases!
