@@ -167,7 +167,7 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
                       self._userdir_prefix(username),
                       self._userdir(username)[0])
 
-        def _fail(_):
+        def _fail(reason):
             raise smtp.SMTPServerError, (451,
                                          'Error contacting the LDAP server: %s'
                                          % reason.getErrorMessage())
