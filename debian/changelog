@@ -1,4 +1,4 @@
-scalemail (0.11.trunk.r94) unstable; urgency=low
+scalemail (0.12) unstable; urgency=low
 
   * Email autoresponder support ("vacation"), known as scalemail.gone:
     - Updated schema to have attributeType scaleMailAway
@@ -9,7 +9,7 @@ scalemail (0.11.trunk.r94) unstable; urgency=low
   * Include all documentation in the deb. This adds README.postfix,
     README.schema that were mistakenly skipped.
 
- -- Tommi Virtanen <tv@debian.org>  Fri,  7 Jan 2005 13:56:47 +0200
+ -- Tommi Virtanen <tv@debian.org>  Tue, 11 Jan 2005 23:48:38 +0200
 
 scalemail (0.11) unstable; urgency=low
 
