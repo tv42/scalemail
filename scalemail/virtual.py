@@ -109,7 +109,7 @@ class ScalemailVirtualMapFactory(protocol.ServerFactory):
             d.addErrback(_fail)
             return d
 
-    def getMappers(self, key):
+    def _getMappers(self, key):
         mappers = []
         for plug in plugin.getPlugIns('Scalemail.mapper.virtual.%s' % key):
             module = plug.load()
@@ -118,6 +118,16 @@ class ScalemailVirtualMapFactory(protocol.ServerFactory):
             mappers.append((pri, mapper))
         mappers.sort()
         return [mapper for (pri, mapper) in mappers]
+
+    _mapperCache = None
+    def getMappers(self, key):
+        if self._mapperCache is None:
+            self._mapperCache = {}
+        r = self._mapperCache.get(key, None)
+        if r is None:
+            r = self._getMappers(key)
+            self._mapperCache[key] = r
+        return r
 
     def callMappers(self, key, *a, **kw):
         def _callMapperIfNoAnswer(answer, mapper, *a, **kw):
