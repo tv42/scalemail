@@ -54,6 +54,7 @@ def _process(path, msg):
                       'TODO-set-from-here',
                       [sender],
                       reply)
+    d.addCallback(lambda _ : False)
     #TODO handle sendmail status
     return d
 
