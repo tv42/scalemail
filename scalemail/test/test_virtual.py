@@ -47,9 +47,24 @@ class TestVirtual(unittest.TestCase):
                                            accounts={
             ('foo', 'example.com'):  [entry.BaseLDAPEntry(dn='cn=foo,dc=example,dc=com',
                                                           attributes={ 'scaleMailHost': ['h1'],
+                                                                       'scaleMailAlias': ['bar@example.com',
+
+                                                                                          # do not obey foreign addresses
+                                                                                          'thud@something.else.invalid',
+                                                                                          ],
                                                                        }),
                                       ],
             ('multiple', 'example.com'):  [1, 2],
+            ('one', 'example.com'):  [entry.BaseLDAPEntry(dn='cn=one,dc=example,dc=com',
+                                                          attributes={ 'scaleMailHost': ['h1'],
+                                                                       'scaleMailAlias': ['numbers@example.com'],
+                                                                       }),
+                                      ],
+            ('two', 'example.com'):  [entry.BaseLDAPEntry(dn='cn=two,dc=example,dc=com',
+                                                          attributes={ 'scaleMailHost': ['h1'],
+                                                                       'scaleMailAlias': ['numbers@example.com'],
+                                                                       }),
+                                      ],
             })
                                            
         
@@ -57,6 +72,10 @@ class TestVirtual(unittest.TestCase):
         self.assertEquals(self.map.get('not-exist'),
                           None)
 
+    def test_map_domainOnly_notExist_aliasDomain(self):
+        self.assertEquals(self.map.get('something.else.invalid'),
+                          None)
+        
     def test_map_domainOnly_exists(self):
         self.assertEquals(self.map.get('example.com'),
                           'DOMAINEXISTS')
@@ -70,8 +89,17 @@ class TestVirtual(unittest.TestCase):
         self.assertEquals(self.map.get('foo.scalemail.not-exist'),
                           None)
 
+    def test_map_domainOnly_hasBox_nonExist_aliasDomain(self):
+        # even for non-existing domains
+        self.assertEquals(self.map.get('foo.scalemail.something.else.invalid'),
+                          None)
+
     def test_map_hasUser_nonExistingDomain(self):
         self.assertEquals(self.map.get('foo@not-exist'),
+                          None)
+
+    def test_map_hasUser_nonExistingDomain_aliasDomain(self):
+        self.assertEquals(self.map.get('thud@something.else.invalid'),
                           None)
 
     def test_map_hasUser_hasBox_nonExistingDomain(self):
@@ -101,6 +129,18 @@ class TestVirtual(unittest.TestCase):
         self.assertRaises(
             util.ScaleMailAccountMultipleEntries,
             testutil.wait, d)
+
+    def test_map_alias_simple(self):
+        d = self.map.get('bar@example.com')
+        r = testutil.wait(d)
+        self.assertEquals(r, 'foo@example.com')
+    test_map_alias_simple.todo = True
+
+    def test_map_alias_multiple(self):
+        d = self.map.get('numbers@example.com')
+        r = testutil.wait(d)
+        self.assertEquals(r, 'one@example.com, two@example.com')
+    test_map_alias_multiple.todo = True
 
     def testUgly(self):
         d = self.map.get('""@')
