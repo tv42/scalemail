@@ -31,9 +31,9 @@ def _shouldProcess(path, msg):
 
     return False
 
-def _prepare(msg,
-             reply,
-             subjectPrefix=None):
+def prepare(msg,
+            reply,
+            subjectPrefix=None):
     sender = util.getSender(msg)
     reply['To'] = sender
 
@@ -74,7 +74,7 @@ def _process(path,
     def _cb(r, msg):
         if r:
             return r
-        d = defer.maybeDeferred(_prepare, msg,
+        d = defer.maybeDeferred(prepare, msg,
                                 reply=goneInfo.message,
                                 subjectPrefix=goneInfo.settings.get('Subject', None))
         d.addCallback(_send,
