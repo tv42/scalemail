@@ -149,7 +149,11 @@ scaleMailAlias: numbers@example.com
     def test_map_alias_multiple(self):
         d = self.map.get('numbers@example.com')
         r = ldaptestutil.pumpingDeferredResult(d)
-        self.assertEquals(r, 'one@example.com, two@example.com')
+        got = r.split(', ')
+        got.sort()
+        wanted = ['one@example.com', 'two@example.com']
+        wanted.sort()
+        self.assertEquals(got, wanted)
     test_map_alias_multiple.todo = True
 
     def testUgly(self):
