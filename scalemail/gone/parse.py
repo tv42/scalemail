@@ -12,6 +12,8 @@ class GoneInfo(object):
         self.interval = interval
         if message is not None:
             self.message = message
+        if settings is None:
+            settings = {}
         self.settings = dict(settings)
 
     def __contains__(self, other):
