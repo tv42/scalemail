@@ -146,3 +146,84 @@ are you there?
                             recipientName='Jack Recipient',
                             )
         self.assertEquals(r.get_all('From'), ['Jack Recipient <the-recipient>'])
+
+    def test_to_From(self):
+        """Original From: is used as To: when available."""
+        reply = email.message_from_string("""\
+Subject: precious
+
+body
+""")
+        msg = email.message_from_string("""\
+From the-sender
+Subject: question
+From: Test Person <test@example.com>
+
+are you there?
+""")
+        r = respond.prepare(msg, reply, recipient='the-recipient')
+        self.assertEquals(r.get_all('To'), ['Test Person <test@example.com>'])
+
+    def test_to_Sender(self):
+        """Original Sender: overrides From: as response To:."""
+        reply = email.message_from_string("""\
+Subject: precious
+
+body
+""")
+        msg = email.message_from_string("""\
+From the-sender
+Subject: question
+From: Test Person <test@example.com>
+Sender: RFC2822 sender info <bar@example.com>
+
+are you there?
+""")
+        r = respond.prepare(msg, reply, recipient='the-recipient')
+        self.assertEquals(r.get_all('To'), ['RFC2822 sender info <bar@example.com>'])
+
+    def test_to_From_commas(self):
+        """Commas in From do not confuse respond (note invalid input, missing Sender)"""
+        reply = email.message_from_string("""\
+Subject: precious
+
+body
+""")
+        msg = email.message_from_string("""\
+From the-sender
+Subject: question
+From: Test Person <test@example.com>, Foo Bar <foo@example.com>
+
+are you there?
+""")
+        r = respond.prepare(msg, reply, recipient='the-recipient')
+        self.assertEquals(r.get_all('To'), ['Test Person <test@example.com>, Foo Bar <foo@example.com>'])
+
+    def test_to_From_multiple(self):
+        """Commas in From do not confuse respond (note invalid input, missing Sender)"""
+        reply = email.message_from_string("""\
+Subject: precious
+
+body
+""")
+        msg = email.message_from_string("""\
+From the-sender
+Subject: question
+From: Test Person <test@example.com>
+From: Foo Bar <foo@example.com>
+
+are you there?
+""")
+        r = respond.prepare(msg, reply, recipient='the-recipient')
+        self.assertEquals(r.get_all('To'), ['Test Person <test@example.com>',
+                                            'Foo Bar <foo@example.com>'])
+
+    def test_to_envelopeSender(self):
+        """Envelope sender is used as To: when original has no From:."""
+        reply = email.message_from_string("""\
+Subject: precious
+
+body
+""")
+        r = respond.prepare(self.msg, reply, recipient='the-recipient')
+        self.assertEquals(r.get_all('To'), ['the-sender'])

@@ -40,7 +40,13 @@ def prepare(msg,
             recipientName=None,
             subjectPrefix=None):
     sender = goneutil.getSender(msg)
-    reply['To'] = sender
+    to = msg.get_all('Sender', None)
+    if to is None:
+        to = msg.get_all('From', None)
+    if to is None:
+        to = [sender]
+    for addr in to:
+        reply['To'] = addr
 
     if 'Subject' not in reply:
         subject = msg['Subject']
