@@ -20,15 +20,20 @@ class TimeInterval(object):
         self.stop = stop
         super(TimeInterval, self).__init__(start, stop)
 
-    def _datetime(class_, timeAsStruct):
-        seconds = time.mktime(timeAsStruct)
-        r = datetime.datetime.fromtimestamp(seconds)
+    def _datetime(class_, t):
+        r = datetime.datetime(year=t.tm_year,
+                              month=t.tm_mon,
+                              day=t.tm_mday,
+                              hour=t.tm_hour,
+                              minute=t.tm_min,
+                              second=t.tm_sec)
         return r
     _datetime = classmethod(_datetime)
 
-    def _date(class_, timeAsStruct):
-        seconds = time.mktime(timeAsStruct)
-        r = datetime.date.fromtimestamp(seconds)
+    def _date(class_, t):
+        r = datetime.date(year=t.tm_year,
+                          month=t.tm_mon,
+                          day=t.tm_mday)
         return r
     _date = classmethod(_date)
 
