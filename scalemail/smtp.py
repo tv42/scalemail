@@ -63,9 +63,9 @@ class AutoRespondMessage(object):
                 path=self.path,
                 msg=msg,
                 sender='',
+                goneInfo=gone,
                 recipient=str(self.user),
                 recipientName=getName(self.config, self.user.ldapEntry),
-                goneInfo=gone,
                 #TODO smtpHost
                 )
             if gone.settings.get('Deliver', 'True').lower() == 'false':
