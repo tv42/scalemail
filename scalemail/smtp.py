@@ -141,7 +141,12 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
 
             def _unbind(entries, proto):
                 proto.unbind()
-                return entries
+                if len(entries) > 1:
+                    raise RuntimeError, "LDAP server exceeded size limit."
+                if entries:
+                    return entries[0]
+                else:
+                    return None
             d.addCallback(_unbind, proto)
 
             return d
