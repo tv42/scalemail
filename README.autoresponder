@@ -1,0 +1,46 @@
+How to use the autoresponder:
+----------------------------
+
+In the LDAP entry for an account, add one or more instances of the
+attributetype scaleMailAway. The values should look like:
+
+away	=	start SP stop [(LF / CRLF) message]
+
+start	=	isotime
+
+stop	=	isotime
+
+isotime	=	year "-" month "-" day
+		[ "T" hour [ ":" minute [ ":" second ] ] ]
+
+Where year, month, day, hour, minute and second should be obvious, and
+message is as defined in RFC 2822.
+
+(That is, two ISO 8601 timestamps separated by space on the first
+line, the rest is an optional mail message.)
+
+During the time between start and stop, the email message given is
+sent as an autoresponse to anyone sending email to the account. A
+single person gets atmost a limited number of autoresponses per time
+interval.
+
+If the message given is a MIME multipart message, the original message
+is attached to it.
+
+Special header fields starting with "X-Scalemail-" can configure
+the following things:
+
+X-Scalemail-Subject
+
+	will be used as subject prefix in the autoresponse
+
+
+
+
+PS. A lot of thanks to Bruce Guenter for his qmail-autoresponder
+    software (http://untroubled.org/qmail-autoresponder/), it
+    provided a lot of inspiration for scalemail.gone.
+
+PPS. scalemail.gone is meant to be a pluggable engine, with no
+     dependency on LDAP or Scalemail itself. Using it in other
+     projects should be quite easy.
