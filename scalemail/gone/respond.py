@@ -37,12 +37,13 @@ def _prepare(msg,
     sender = util.getSender(msg)
     reply['To'] = sender
 
-    subject = msg['Subject']
-    if subject is None:
-        subject = 'Your mail'
-    if subjectPrefix is not None:
-        subject = subjectPrefix + subject
-    reply['Subject'] = subject
+    if 'Subject' not in reply:
+        subject = msg['Subject']
+        if subject is None:
+            subject = 'Your mail'
+        if subjectPrefix is not None:
+            subject = subjectPrefix + subject
+        reply['Subject'] = subject
 
     msgid = msg.get('Message-ID', None)
     if msgid is not None:
