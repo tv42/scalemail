@@ -7,7 +7,7 @@ Remember to run "/etc/init.d/scalemail force-reload" after editing.
 
 If everything is set properly, you can test with
 
-	/usr/sbin/postmap -q username@example.com tcp:localhost:8026
+	/usr/sbin/postmap -q username@example.com tcp:127.0.0.1:8026
 
 (of course you need to have that user in LDAP for this to work).  The
 result should look like
@@ -19,8 +19,8 @@ result should look like
 SMTP service. Edit /etc/postfix/transport (replace example.com with
 your domain):
 
-	scalemail.example.com    smtp:[localhost]:8025
-	.scalemail.example.com   smtp:[localhost]:8025
+	scalemail.example.com    smtp:[127.0.0.1]:8025
+	.scalemail.example.com   smtp:[127.0.0.1]:8025
 
 And run
 
@@ -42,7 +42,7 @@ scalemail.example.com appropriately, you can use
 3. Edit /etc/postfix/main.cf, modify virtual_maps to include the
 Scalemail virtual mapping server.
 
-	virtual_maps = ..., tcp:localhost:8026, ...
+	virtual_alias_maps = ..., tcp:127.0.0.1:8026, ...
 
 
 3. Make sure postfix reloads its configuration. Run
