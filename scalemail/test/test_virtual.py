@@ -46,7 +46,7 @@ dn: dc=example,dc=com
 dn: cn=foo,dc=example,dc=com
 mail: foo@example.com
 scaleMailHost: h1
-scaleMailAlias: bar@example.com
+scaleMailAlias: anotherfoo@example.com
 # do not obey foreign addresses
 scaleMailAlias: thud@something.else.invalid
 
@@ -141,7 +141,7 @@ scaleMailAlias: numbers@example.com
             ldaptestutil.pumpingDeferredResult, d)
 
     def test_map_alias_simple(self):
-        d = self.map.get('bar@example.com')
+        d = self.map.get('anotherfoo@example.com')
         r = ldaptestutil.pumpingDeferredResult(d)
         self.assertEquals(r, 'foo@example.com')
     test_map_alias_simple.todo = True
