@@ -68,49 +68,51 @@ class AccountGetter(object):
         if clientFactory is not None:
             self.clientFactory = clientFactory
 
+    def _connect(self, domain):
+        dn = self.config.getDNForDomain(domain)
+        c = ldapconnector.LDAPClientCreator(reactor, self.clientFactory)
+        d = c.connectAnonymously(dn, self.config.getServiceLocationOverride())
+        return d
+
+    def _fetch(self,
+               proto,
+               user, domain,
+               ldapAttributeMailbox,
+               ldapAttributeMailHost,
+               dn):
+        o = ldapsyntax.LDAPEntry(client=proto, dn=dn)
+        d=o.search(filterObject=pureldap.LDAPFilter_equalityMatch(
+            attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
+            assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)))
+
+        def _unbind(r, proto):
+            proto.unbind()
+            return r
+        d.addBoth(_unbind, proto)
+
+        return d
+
+    def _searchCompleted(self, entries):
+        if len(entries) < 1:
+            raise ScaleMailAccountNotFound
+        if len(entries) > 1:
+            raise ScaleMailAccountMultipleEntries
+        e = entries[0]
+        return e
+
     def getAccount(self, local, domain):
         """
         Get the LDAPEntry for this account.
         """
         username, folder = addr_split(local, self.config.getRecipientDelimiters())
 
-        dn = self.config.getDNForDomain(domain)
-        c = ldapconnector.LDAPClientCreator(reactor, self.clientFactory)
-        d = c.connectAnonymously(dn, self.config.getServiceLocationOverride())
-
-        def _fetch(proto,
-                   user, domain,
-                   ldapAttributeMailbox,
-                   ldapAttributeMailHost,
-                   dn):
-            o = ldapsyntax.LDAPEntry(client=proto, dn=dn)
-            d=o.search(filterObject=pureldap.LDAPFilter_equalityMatch(
-                attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
-                assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)))
-
-            def _unbind(r, proto):
-                proto.unbind()
-                return r
-            d.addBoth(_unbind, proto)
-
-            return d
-
-        d.addCallback(_fetch,
+        d = self._connect(domain)
+        d.addCallback(self._fetch,
                       user=username, domain=domain,
                       ldapAttributeMailbox=self.config.getLDAPAttributeMailbox(),
                       ldapAttributeMailHost=self.config.getLDAPAttributeMailHost(),
                       dn=self.config.getDNForDomain(domain))
-
-        def _searchCompleted(entries):
-            if len(entries) < 1:
-                raise ScaleMailAccountNotFound
-            if len(entries) > 1:
-                raise ScaleMailAccountMultipleEntries
-            e = entries[0]
-            return e
-
-        d.addCallback(_searchCompleted)
-
+        d.addCallback(self._searchCompleted)
         return d
 
 def getAccount(config, local, domain,
