@@ -1,6 +1,7 @@
 import sets
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEMessage import MIMEMessage
+import email.Utils
 from twisted.internet import defer
 from twisted.protocols import smtp
 from scalemail.gone import igone, blacklist, ratedir, util
@@ -33,6 +34,7 @@ def _shouldProcess(path, msg):
 
 def prepare(msg,
             reply,
+            recipient=None,
             subjectPrefix=None):
     sender = util.getSender(msg)
     reply['To'] = sender
@@ -44,6 +46,14 @@ def prepare(msg,
         if subjectPrefix is not None:
             subject = subjectPrefix + subject
         reply['Subject'] = subject
+
+    if 'From' not in reply:
+        to = email.Utils.getaddresses(msg.get_all('To', []))
+        to = [x for x in to if x != ('', '')]
+        if to:
+            reply['From'] = email.Utils.formataddr(to[0])
+        elif recipient is not None:
+            reply['From'] = recipient
 
     msgid = msg.get('Message-ID', None)
     if msgid is not None:
@@ -65,6 +75,7 @@ def _send(msg, smtpHost, sender, recipient):
 def _process(path,
              msg,
              sender,
+             recipient,
              goneInfo,
              smtpHost=None,
              ):
@@ -76,6 +87,7 @@ def _process(path,
             return r
         d = defer.maybeDeferred(prepare, msg,
                                 reply=goneInfo.message,
+                                recipient=recipient,
                                 subjectPrefix=goneInfo.settings.get('Subject', None))
         d.addCallback(_send,
                       smtpHost=smtpHost,

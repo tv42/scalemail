@@ -53,10 +53,16 @@ class AutoRespondMessage(object):
             msg = email.message_from_file(f)
             f.close()
             goneutil.setSender(msg, self.user.orig)
+            box, domain = util.host_split(self.user.dest.domain)
+            if domain is None:
+                domain = self.user.dest.domain
+
             d = respond.process(
                 path=self.path,
                 msg=msg,
                 sender='',
+                recipient=str(smtp.Address(self.user.dest.local,
+                                           domain)),
                 goneInfo=gone,
                 #TODO smtpHost
                 )

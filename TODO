@@ -23,7 +23,4 @@
 * if gone message is not multipart, textually insert original at end
    of message
 
-* make respond.py set From: to the original message To: (if any) or
-   envelope recipient, but only if gone message has no From header.
-
 * if gone message body is empty, use a default message
