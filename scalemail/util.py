@@ -59,55 +59,64 @@ class ScaleMailAccountNotFound(ScaleMailAccountSearchError):
 class ScaleMailAccountMultipleEntries(ScaleMailAccountSearchError):
     """User matches multiple LDAP entries, LDAP content inconsistent"""
 
-def getAccount(config, local, domain,
-               clientFactory=None):
-    """
+class AccountGetter(object):
+    clientFactory = ldapclient.LDAPClient
 
-    Get the LDAPEntry for this account.
+    def __init__(self, config, clientFactory=None, *a, **kw):
+        super(AccountGetter, self).__init__(*a, **kw)
+        self.config = config
+        if clientFactory is not None:
+            self.clientFactory = clientFactory
 
-    """
-    username, folder = addr_split(local, config.getRecipientDelimiters())
+    def getAccount(self, local, domain):
+        """
+        Get the LDAPEntry for this account.
+        """
+        username, folder = addr_split(local, self.config.getRecipientDelimiters())
 
-    dn = config.getDNForDomain(domain)
-    if clientFactory is None:
-        clientFactory = ldapclient.LDAPClient
-    c = ldapconnector.LDAPClientCreator(reactor, clientFactory)
-    d = c.connectAnonymously(dn, config.getServiceLocationOverride())
+        dn = self.config.getDNForDomain(domain)
+        c = ldapconnector.LDAPClientCreator(reactor, self.clientFactory)
+        d = c.connectAnonymously(dn, self.config.getServiceLocationOverride())
 
-    def _fetch(proto,
-               user, domain,
-               ldapAttributeMailbox,
-               ldapAttributeMailHost,
-               dn):
-        o = ldapsyntax.LDAPEntry(client=proto, dn=dn)
-        d=o.search(filterObject=pureldap.LDAPFilter_equalityMatch(
-            attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
-            assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)))
+        def _fetch(proto,
+                   user, domain,
+                   ldapAttributeMailbox,
+                   ldapAttributeMailHost,
+                   dn):
+            o = ldapsyntax.LDAPEntry(client=proto, dn=dn)
+            d=o.search(filterObject=pureldap.LDAPFilter_equalityMatch(
+                attributeDesc=pureldap.LDAPAttributeDescription(ldapAttributeMailbox),
+                assertionValue=pureldap.LDAPAssertionValue(user+'@'+domain)))
 
-        def _unbind(r, proto):
-            proto.unbind()
-            return r
-        d.addBoth(_unbind, proto)
+            def _unbind(r, proto):
+                proto.unbind()
+                return r
+            d.addBoth(_unbind, proto)
+
+            return d
+
+        d.addCallback(_fetch,
+                      user=username, domain=domain,
+                      ldapAttributeMailbox=self.config.getLDAPAttributeMailbox(),
+                      ldapAttributeMailHost=self.config.getLDAPAttributeMailHost(),
+                      dn=self.config.getDNForDomain(domain))
+
+        def _searchCompleted(entries):
+            if len(entries) < 1:
+                raise ScaleMailAccountNotFound
+            if len(entries) > 1:
+                raise ScaleMailAccountMultipleEntries
+            e = entries[0]
+            return e
+
+        d.addCallback(_searchCompleted)
 
         return d
 
-    d.addCallback(_fetch,
-                  user=username, domain=domain,
-                  ldapAttributeMailbox=config.getLDAPAttributeMailbox(),
-                  ldapAttributeMailHost=config.getLDAPAttributeMailHost(),
-                  dn=config.getDNForDomain(domain))
-
-    def _searchCompleted(entries):
-        if len(entries) < 1:
-            raise ScaleMailAccountNotFound
-        if len(entries) > 1:
-            raise ScaleMailAccountMultipleEntries
-        e = entries[0]
-        return e
-
-    d.addCallback(_searchCompleted)
-
-    return d
+def getAccount(config, local, domain,
+               clientFactory=None):
+    f = AccountGetter(config, clientFactory=clientFactory)
+    return f.getAccount(local, domain)
 
 def getBoxes(entry, config):
     """
