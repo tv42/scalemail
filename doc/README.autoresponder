@@ -1,9 +1,12 @@
 How to use the autoresponder:
 ----------------------------
 
-WARNING: Twisted (as of 1.3.0-5) contains two severe bugs that
-may cause lost mail and actually prevent using the autoresponder.
-See http://bugs.debian.org/289993 for more.
+WARNING to non-Debian users:
+
+  Twisted 1.3 contains two severe bugs that may cause lost mail and
+  actually prevent using the autoresponder. These have been fixed in
+  upstream Twisted, in commits r12036, r12767 and r12858. Debian has
+  these bugs fixed in twisted-1.3.0-6 and later.
 
 
 In the LDAP entry for an account, add one or more instances of the

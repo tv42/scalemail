@@ -16,11 +16,6 @@
 
 * test #@[] as sender
 
-* needs twisted commit r12036 to have reliable autoresponder processing
-
-* needs twisted commit r12767 to be able to send responses from <>
-   (which breaks receiving mail from <>, so needs r12858 also)
-
 * if gone message is not multipart, textually insert original at end
    of message
 
