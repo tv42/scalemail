@@ -1,3 +1,24 @@
+scalemail (0.7) unstable; urgency=low
+
+  * Authentication used to fail if LDAP entry happened to have a
+    homeDirectory that exists on the current host. Rename
+    MAILDIR_FALLBACK to MAILDIR_OVERRIDE, and make it override any
+    home directory received from LDAP. Rename
+    courier-authlib-maildir-fallback.patch to
+    courier-authlib-maildir-override.patch, to reflect its new
+    content and semantics. To upgrade, you need to repatch and
+    build courier-authdaemon, and re-edit all the files as
+    specified in README.courier.
+  * Use python2.2 explicitly for now, to allow the python 2.2->2.3
+    migration to continue.
+  * Add missing variable interpolation that caused scalemail SMTP
+    server to claim it's hostname is "scalemail.%s".
+  * Robustness improvement: the spool directory can now be a
+    symlink.
+  * Use "set -e" instead of "#!/bin/sh -e" in prerm script.
+
+ -- Tommi Virtanen <tv@debian.org>  Sat,  9 Aug 2003 16:40:22 +0300
+
 scalemail (0.6) unstable; urgency=low
 
   * Make sure to close LDAP server connections.

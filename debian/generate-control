@@ -75,7 +75,7 @@ otherpackage = """
 Package: %(setup --name)s
 Section: %(extract-setup-var debian-section)s
 Architecture: all
-Depends: python (>= %(var PYTHON_VERSION_DEFAULT)s), python (<< %(var PYTHON_VERSION_TOOBIG)s), python%(var PYTHON_VERSION_DEFAULT)s-twisted, python%(var PYTHON_VERSION_DEFAULT)s-ldaptor (>= 0.0.18), postfix (>= 0.0.20010329.SNAPSHOT) | postfix-tls (>= 0.0.20010329.SNAPSHOT), perl, make
+Depends: python%(var PYTHON_VERSION_DEFAULT)s, python%(var PYTHON_VERSION_DEFAULT)s-twisted, python%(var PYTHON_VERSION_DEFAULT)s-ldaptor (>= 0.0.18), postfix (>= 0.0.20010329.SNAPSHOT) | postfix-tls (>= 0.0.20010329.SNAPSHOT), perl, make
 Suggests: courier-imap-ssl | courier-ssl, slapd
 Description: %(setup --description)s
 """

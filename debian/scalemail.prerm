@@ -1,4 +1,5 @@
-#!/bin/sh -e
+#!/bin/sh
+set -e
 
 if [ "$1" = "remove" ]; then
     chown -R root:root /var/spool/scalemail /var/run/scalemail

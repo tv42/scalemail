@@ -293,7 +293,7 @@ class ScalemailSMTPFactory(smtp.SMTPFactory):
         smtp.SMTPFactory.__init__(self, portal=None)
         self.spool=spool
         self.config=config
-        self.domain = 'scalemail.%s'
+        self.domain = 'scalemail.%s' % self.domain
 
 def calltrace():
     def printfuncnames(frame, event, dummy_arg):

@@ -1,0 +1,29 @@
+--- courier-0.42.2.orig/authlib/success.c	2003-02-27 06:48:52.000000000 +0200
++++ courier-0.42.2/authlib/success.c	2003-08-08 19:31:33.000000000 +0300
+@@ -43,11 +43,21 @@
+ 		libmail_changeuidgid(*uid, *gid);
+ 	}
+ 
+-	if (chdir(homedir))
+-	{
+-		fprintf(stderr, "chdir \"%s\": %s\n", homedir,
+-			strerror(errno));
+-		authexit(1);
++	if (getenv("MAILDIR_OVERRIDE") && *getenv("MAILDIR_OVERRIDE")) {
++		if (chdir(getenv("MAILDIR_OVERRIDE")))
++		{
++			fprintf(stderr, "chdir to MAILDIR_OVERRIDE: %s\n",
++				strerror(errno));
++			authexit(1);
++		}
++		putenv("MAILDIR=.");
++	} else {
++		if (chdir(homedir))
++		{
++			fprintf(stderr, "chdir \"%s\": %s\n", homedir,
++				strerror(errno));
++			authexit(1);
++		}
+ 	}
+ 
+ 	if (!authaddr)	authaddr="";

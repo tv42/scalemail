@@ -6,7 +6,7 @@ courier-authdaemon, with a patch.
 
 $ apt-get source courier-authdaemon
 $ cd courier-*
-$ patch -p1 </usr/share/doc/scalemail/courier-authlib-maildir-fallback.patch
+$ patch -p1 </usr/share/doc/scalemail/courier-authlib-maildir-override.patch
 $ dpkg-buildpackage -rfakeroot -us -uc
 $ su
 # dpkg -i ../courier-authdaemon_*.deb
@@ -23,17 +23,17 @@ Replace existing entries and add missing entries to match:
 /etc/courier/imapd:
 
 AUTHMODULES="authdaemon scalemail-courier-login-mapper"
-MAILDIR_FALLBACK=/var/spool/scalemail
+MAILDIR_OVERRIDE=/var/spool/scalemail
 
 /etc/courier/pop3d:
 
 AUTHMODULES="authdaemon scalemail-courier-login-mapper"
-MAILDIR_FALLBACK=/var/spool/scalemail
+MAILDIR_OVERRIDE=/var/spool/scalemail
 
 /etc/init.d/courier-pop:
 
 to the line containing "env -", add
-MAILDIR_FALLBACK=/var/spool/scalemail
+MAILDIR_OVERRIDE=/var/spool/scalemail
 
 /etc/courier/authdaemonrc:
 
