@@ -23,8 +23,6 @@
 * if gone message is multipart, attach original message; if not,
    textually insert at end of message
 
-* make sure gone message Message-Id header is overwritten
-
 * make respond.py subject sending only happen if gone message has no
    Subject header
 
