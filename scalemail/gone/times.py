@@ -2,6 +2,8 @@ import datetime
 from mx import DateTime
 
 class TimeInterval(object):
+    start = None
+    stop = None
     def __init__(self, start, stop):
         self.start = start
         self.stop = stop
@@ -23,6 +25,37 @@ class TimeInterval(object):
     def __contains__(self, time):
         # inclusive so date-only ranges act sanely
         return (time >= self.start and time <= self.stop)
+
+    def __str__(self):
+        return '%s %s' % (self.start.isoformat(),
+                          self.stop.isoformat())
+
+    def __repr__(self):
+        return '%s(start=%r, stop=%r)' % (
+            self.__class__.__name__,
+            self.start,
+            self.stop)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        if (self.start == other.start
+            and self.stop == other.stop):
+            return True
+        else:
+            return False
+
+    def __ne__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+
+        if (self.start != other.start
+            or self.stop != other.stop):
+            return True
+        else:
+            return False
+
 
 def findTime(now, times):
     for interval in times:
