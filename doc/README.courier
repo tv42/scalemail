@@ -1,5 +1,42 @@
 Configuring Courier-IMAP to work with Scalemail:
------------------------------------------------
+===============================================
+
+The new way:
+-----------
+
+1. You need to change Courier configuration files.
+Replace existing entries and add missing entries to match:
+
+/etc/courier/imapd:
+
+AUTHMODULES="scalemail-courier-login"
+
+/etc/courier/pop3d:
+
+AUTHMODULES="scalemail-courier-login"
+
+
+2. Restart courier-imap and pop.
+
+# /etc/init.d/courier-imap stop
+# /etc/init.d/courier-imap start
+# /etc/init.d/courier-imap-ssl stop
+# /etc/init.d/courier-imap-ssl start
+# /etc/init.d/courier-pop stop
+# /etc/init.d/courier-pop start
+# /etc/init.d/courier-pop-ssl stop
+# /etc/init.d/courier-pop-ssl start
+
+
+That's it!
+
+Optionally, you may disable courier-authdaemon in a manner
+you see fit. It is not used anymore with this setup.
+
+
+
+The old way:
+-----------
 
 1. You need to rebuild courier-imap, more specifically
 courier-authdaemon, with a patch.
@@ -54,7 +91,7 @@ LDAP_AUTHBIND           1 (most likely you want this)
 MAILDIR="."
 
 
-4. Restart courier-authdaemon, courier-imap and courier-imap-ssl
+4. Restart courier-authdaemon, courier-imap and courier-pop.
 
 # /etc/init.d/courier-authdaemon stop
 # /etc/init.d/courier-authdaemon start
@@ -62,6 +99,10 @@ MAILDIR="."
 # /etc/init.d/courier-imap start
 # /etc/init.d/courier-imap-ssl stop
 # /etc/init.d/courier-imap-ssl start
+# /etc/init.d/courier-pop stop
+# /etc/init.d/courier-pop start
+# /etc/init.d/courier-pop-ssl stop
+# /etc/init.d/courier-pop-ssl start
 
 
 That's it!
