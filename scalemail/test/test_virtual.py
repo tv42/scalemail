@@ -167,6 +167,11 @@ scaleMailAlias: numbers@example.com
         r = ldaptestutil.pumpingDeferredResult(d)
         self.failUnlessIdentical(r, None)
 
+    def test_extension_simple(self):
+        d = self.map.get('foo+some.extension.here@example.com')
+        r = ldaptestutil.pumpingDeferredResult(d)
+        self.assertEquals(r, 'foo+some.extension.here@h1.scalemail.example.com')
+
 class Alias(SetupMixin, unittest.TestCase):
     ldif = """version: 1
 dn: dc=example,dc=com
