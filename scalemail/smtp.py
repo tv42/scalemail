@@ -90,19 +90,16 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
         return (os.path.join(self._userdir_prefix(username), username), folder)
 
     def exists(self, user, memo=None):
-        if self.userDirectory(user.dest.local) is not None:
-            return lambda: self.startMessage(user)
-        else:
-            # do the LDAP dance and make sure the dir gets created
-            d = self.ldapUserExists(user.dest.local)
-            def _cb(found):
-                if found:
-                    return lambda: self.startMessage(user)
-                else:
-                    raise smtp.SMTPBadRcpt, (
-                        user, 550, 'User not found in LDAP.')
-            d.addCallback(_cb)
-            return d
+        # do the LDAP dance and make sure the dir gets created
+        d = self.ldapUserExists(user.dest.local)
+        def _cb(found):
+            if found:
+                return lambda: self.startMessage(user)
+            else:
+                raise smtp.SMTPBadRcpt, (
+                    user, 550, 'User not found in LDAP.')
+        d.addCallback(_cb)
+        return d
 
     def ldapUserExists(self, username):
         username, folder = util.addr_split(username, self.config.getRecipientDelimiters())
