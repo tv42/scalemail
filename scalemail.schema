@@ -51,7 +51,8 @@ objectclass ( 1.3.6.1.4.1.9586.2.100.2.2.1
 	SUP top
 	MUST ( mail $ scaleMailHost )
 	MAY ( scaleMailAlias $ scaleMailAlias $ 
-		scaleMailForward $ scaleMailForwardCopy ) )
+		scaleMailForward $ scaleMailForwardCopy $
+		scaleMailAway ) )
 
 objectclass ( 1.3.6.1.4.1.9586.2.100.2.2.2
 	NAME 'scaleMailQuotaObject'
