@@ -7,7 +7,7 @@ class IRealWorld(Interface):
 
     def uniqueIdentifier(self):
         """
-        Return a unique identifier for this process instance.
+        @return: A unique identifier for this process instance.
 
         The identifier must not contain a period.
 
@@ -20,7 +20,8 @@ class IRealWorld(Interface):
 class IMessage(Interface):
     def getMessage(self):
         """
-        Message as email.Message.
+        @return: The message.
+        @rtype: email.Message
 
         The envelope sender, as gettable with .get_unixfrom(), _must_
         be set.
@@ -42,6 +43,6 @@ class IRateLimit(Interface):
         """
         Add one message to rate tracking for sender at time now.
 
-        If rate limit would be exceeded, raises RateExceededError.
+        @raise RateExceededError: If rate limit would be exceeded.
         """
         pass
