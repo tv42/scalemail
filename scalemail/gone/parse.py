@@ -19,6 +19,26 @@ class GoneInfo(object):
     def __contains__(self, other):
         return other in self.interval
 
+    def __repr__(self):
+        return '%s(interval=%r, message=%r, settings=%r)' % (
+            self.__class__.__name__,
+            self.interval,
+            self.message.as_string(unixfrom=False),
+            self.settings)
+
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return (self.interval == other.interval
+                and self.message.as_string(unixfrom=False)
+                == other.message.as_string(unixfrom=False)
+                and self.settings == other.settings)
+
+    def __ne__(self, other):
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return not (self == other)
+
 HEADER_PREFIX = 'x-scalemail-'
 
 def parseMessage(fp):
