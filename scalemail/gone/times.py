@@ -5,10 +5,17 @@ class InvalidTimeFormatError(Exception):
     def __str__(self):
         return '%s: %r' % (self.__doc__, ', '.join(self.args))
 
+class StartMustPredateStopError(Exception):
+    """Start time must be before stop time"""
+    def __str__(self):
+        return '%s: %s > %s' % (self.__doc__, self.args[0], self.args[1])
+
 class TimeInterval(object):
     start = None
     stop = None
     def __init__(self, start, stop):
+        if start > stop:
+            raise StartMustPredateStopError, (start, stop)
         self.start = start
         self.stop = stop
         super(TimeInterval, self).__init__(start, stop)

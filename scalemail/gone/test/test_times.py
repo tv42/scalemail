@@ -196,3 +196,24 @@ class Intersection(unittest.TestCase):
     def test_11(self):
         self.check(other='2004-01-01 2006-01-01',
                    want='2005-01-09T01:02:03 2005-01-09T03:02:03')
+
+class ChronologicalOrder(unittest.TestCase):
+    def test_equal_day(self):
+        s = '2001-02-01 2001-02-01'
+        t = times.TimeInterval.fromString(s)
+        # that's it!
+
+    def test_equal_time(self):
+        s = '2001-02-01T12:05 2001-02-01T12:05'
+        t = times.TimeInterval.fromString(s)
+        # that's it!
+
+    def test_bad_day(self):
+        s = '2001-02-02 2001-02-01'
+        e = self.assertRaises(times.StartMustPredateStopError,
+                              times.TimeInterval.fromString, s)
+
+    def test_bad_time(self):
+        s = '2001-02-02T12:05 2001-02-02T12:03'
+        e = self.assertRaises(times.StartMustPredateStopError,
+                              times.TimeInterval.fromString, s)
