@@ -227,3 +227,12 @@ body
 """)
         r = respond.prepare(self.msg, reply, recipient='the-recipient')
         self.assertEquals(r.get_all('To'), ['the-sender'])
+
+    def test_order(self):
+        """Headers are added in human-friendly order, From/To/Subject."""
+        reply = email.message_from_string("""\
+
+body
+""")
+        r = respond.prepare(self.msg, reply, recipient='the-recipient')
+        self.assertEquals(r.keys(), ['From', 'To', 'Subject'])

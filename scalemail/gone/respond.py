@@ -40,6 +40,17 @@ def prepare(msg,
             recipientName=None,
             subjectPrefix=None):
     sender = goneutil.getSender(msg)
+
+    if ('From' not in reply
+        and recipient is not None):
+            if '@' in recipient:
+                local, host = recipient.split('@', 1)
+                box, domain = util.host_split(host)
+                if domain is not None:
+                    host = domain
+                recipient = str(smtp.Address(local, host))
+            reply['From'] = email.Utils.formataddr((recipientName, recipient))
+
     to = msg.get_all('Sender', None)
     if to is None:
         to = msg.get_all('From', None)
@@ -55,16 +66,6 @@ def prepare(msg,
         if subjectPrefix is not None:
             subject = subjectPrefix + subject
         reply['Subject'] = subject
-
-    if ('From' not in reply
-        and recipient is not None):
-            if '@' in recipient:
-                local, host = recipient.split('@', 1)
-                box, domain = util.host_split(host)
-                if domain is not None:
-                    host = domain
-                recipient = str(smtp.Address(local, host))
-            reply['From'] = email.Utils.formataddr((recipientName, recipient))
 
     msgid = msg.get('Message-ID', None)
     if msgid is not None:
