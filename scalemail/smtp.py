@@ -136,7 +136,6 @@ class ScalemailMaildirDomain(maildir.AbstractMaildirDomain):
                 assertionValue=pureldap.LDAPAssertionValue(box)),
 
                 ]),
-                       typesOnly=1,
                        attributes=[self.config.getLDAPAttributeAway()],
                        sizeLimit=1)
 
