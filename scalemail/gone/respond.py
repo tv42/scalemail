@@ -1,6 +1,5 @@
 import sets
 from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
 from email.MIMEMessage import MIMEMessage
 from twisted.internet import defer
 from twisted.protocols import smtp
@@ -33,9 +32,8 @@ def _shouldProcess(path, msg):
     return False
 
 def _prepare(msg,
-             content,
+             reply,
              subjectPrefix=None):
-    reply = MIMEMultipart()
     sender = util.getSender(msg)
     reply['To'] = sender
 
@@ -51,8 +49,8 @@ def _prepare(msg,
         msgid = msgid.strip()
         reply['In-Reply-To'] = msgid
 
-    reply.attach(MIMEText(content.encode('utf-8'), _charset='utf-8'))
-    reply.attach(MIMEMessage(msg))
+    if reply.is_multipart():
+        reply.attach(MIMEMessage(msg))
     return reply
     
 def _send(msg, smtpHost, sender, recipient):
@@ -76,7 +74,7 @@ def _process(path,
         if r:
             return r
         d = defer.maybeDeferred(_prepare, msg,
-                                content=goneInfo.message,
+                                reply=goneInfo.message,
                                 subjectPrefix=goneInfo.settings.get('Subject', None))
         d.addCallback(_send,
                       smtpHost=smtpHost,

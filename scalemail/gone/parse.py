@@ -27,8 +27,6 @@ def parse(s):
     ival = times.TimeInterval.fromString(firstLine)
 
     e = email.message_from_file(f)
-    if e.is_multipart():
-        raise RuntimeError, "Gone messages can't use multipart MIME things."
 
     settings = {}
     for k,v in e.items():

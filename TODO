@@ -20,8 +20,8 @@
 
 * needs twisted commit r12767 to be able to send responses from <>
 
-* if gone message is multipart, attach original message; if not,
-   textually insert at end of message
+* if gone message is not multipart, textually insert original at end
+   of message
 
 * make respond.py subject sending only happen if gone message has no
    Subject header
