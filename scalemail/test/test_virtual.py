@@ -158,10 +158,14 @@ scaleMailAlias: numbers@example.com
         self.assertEquals(got, wanted)
 
     def testUgly(self):
-        d = self.map.get('""@')
-        self.assertRaises(
-            ldaperrors.LDAPNoSuchObject,
-            ldaptestutil.pumpingDeferredResult, d)
+        d = defer.execute(self.map.get, '""@')
+        r = ldaptestutil.pumpingDeferredResult(d)
+        self.failUnlessIdentical(r, None)
+
+    def testUgly_has_local(self):
+        d = defer.execute(self.map.get, 'foo@')
+        r = ldaptestutil.pumpingDeferredResult(d)
+        self.failUnlessIdentical(r, None)
 
 class Alias(SetupMixin, unittest.TestCase):
     ldif = """version: 1

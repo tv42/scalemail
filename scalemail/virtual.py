@@ -55,6 +55,12 @@ class ScalemailVirtualMapFactory(protocol.ServerFactory):
                 return None
         else:
             local, host = key.split('@', 1)
+
+            if not host:
+                # "foo@", no way it'll ever match anything, claim it's
+                # not found
+                return None
+
             box, domain = util.host_split(host)
 
             if box is not None and domain is None:
