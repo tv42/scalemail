@@ -23,8 +23,6 @@
 * if gone message is multipart, attach original message; if not,
    textually insert at end of message
 
-* switch to X-Scalemail-Subject-Prefix: etc in gone messages
-
 * let gone message set header fields of outgoing messages; only strip
    out X-Scalemail-* (make sure Message-Id is overwritten)
 

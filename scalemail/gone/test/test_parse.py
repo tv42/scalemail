@@ -24,42 +24,39 @@ foo
     def test_interval_header_noEmptyLine(self):
         r = parse.parse("""\
 2001-02-01 2001-02-03
-Subject: add-a-prefix
+X-Scalemail-Subject-Prefix: add-a-prefix
 """)
         self.assertEquals(r.interval.start, datetime.date(2001, 2, 1))
         self.assertEquals(r.interval.stop, datetime.date(2001, 2, 3))
         self.assertIdentical(r.message, None)
-        self.assertEquals(r.settings, {'Subject': 'add-a-prefix'})
+        self.assertEquals(r.settings, {'subject-prefix': 'add-a-prefix'})
 
     def test_interval_header_emptyLine(self):
         r = parse.parse("""\
 2001-02-01 2001-02-03
-Subject: add-a-prefix
+X-Scalemail-Subject-Prefix: add-a-prefix
 
 """)
         self.assertEquals(r.interval.start, datetime.date(2001, 2, 1))
         self.assertEquals(r.interval.stop, datetime.date(2001, 2, 3))
         self.assertIdentical(r.message, None)
-        self.assertEquals(r.settings, {'Subject': 'add-a-prefix'})
+        self.assertEquals(r.settings, {'subject-prefix': 'add-a-prefix'})
 
     def test_interval_header_message(self):
         r = parse.parse("""\
 2001-02-01 2001-02-03
-Subject: add-a-prefix
+X-Scalemail-Subject-Prefix: add-a-prefix
 
 foo
 """)
         self.assertEquals(r.interval.start, datetime.date(2001, 2, 1))
         self.assertEquals(r.interval.stop, datetime.date(2001, 2, 3))
         self.assertEquals(r.message, 'foo\n')
-        self.assertEquals(r.settings, {'Subject': 'add-a-prefix'})
+        self.assertEquals(r.settings, {'subject-prefix': 'add-a-prefix'})
 
 class Contains(unittest.TestCase):
     def test_contains(self):
-        r = parse.parse("""\
-2001-02-01 2001-02-03
-Subject: add-a-prefix
-""")
+        r = parse.parse("""2001-02-01 2001-02-03""")
         self.failIf(datetime.date(2001, 1, 31) in r)
         self.failUnless(datetime.date(2001, 2, 1) in r)
         self.failUnless(datetime.date(2001, 2, 2) in r)

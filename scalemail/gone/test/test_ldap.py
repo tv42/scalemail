@@ -24,7 +24,7 @@ foo
 """,
             """\
 2001-02-05 2001-02-07
-Subject: add-a-prefix
+X-Scalemail-Subject-Prefix: add-a-prefix
 """],
             })
         self.config = test_util.ConfigDriver('/foo', {})
@@ -45,5 +45,5 @@ Subject: add-a-prefix
         now = datetime.date(2001, 2, 5)
         r = ldap.is_active(self.config, self.e, now)
         self.failIfIdentical(r, None)
-        self.assertEquals(r.settings, {'Subject': 'add-a-prefix'})
+        self.assertEquals(r.settings, {'subject-prefix': 'add-a-prefix'})
         self.assertEquals(r.message, None)
