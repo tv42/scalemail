@@ -10,7 +10,7 @@ scalemail (0.16) unstable; urgency=low
     delivery.
   * Fixed a typo in changelog for 0.14.
 
- -- Tommi Virtanen <tv@debian.org>  Thu,  3 Feb 2005 17:41:08 +0200
+ -- Tommi Virtanen <tv@debian.org>  Thu,  3 Feb 2005 18:46:20 +0200
 
 scalemail (0.15) unstable; urgency=low
 
