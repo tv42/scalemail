@@ -1,3 +1,9 @@
+scalemail (0.5) unstable; urgency=low
+
+  * Add the missing plugins.tml file to the package.
+
+ -- Tommi Virtanen <tv@debian.org>  Thu,  7 Aug 2003 19:26:01 +0300
+
 scalemail (0.4) unstable; urgency=low
 
   * Use Twisted plugins for the Postfix virtual address rewriting,

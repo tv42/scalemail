@@ -31,5 +31,7 @@ Python and Twisted.
                        ["scalemail.schema"]),
                       ('/usr/lib/courier/authlib',
                        ["scalemail-courier-login-mapper"]),
+                      (os.path.join(get_python_lib(), 'scalemail'),
+                       ["scalemail/plugins.tml"]),
                       ],
 	  )
