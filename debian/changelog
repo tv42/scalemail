@@ -1,3 +1,12 @@
+scalemail (0.9) unstable; urgency=low
+
+  * New dia uploaded to unstable
+    => new Ldaptor uploaded to unstable
+    => can finally upload scalemail to unstable, too.
+  * Switch to python 2.3.
+
+ -- Tommi Virtanen <tv@debian.org>  Sat, 26 Jun 2004 15:01:28 +0300
+
 scalemail (0.8) experimental; urgency=low
 
   * Acknowledge NMU. (Closes: #211483)

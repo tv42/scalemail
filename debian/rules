@@ -4,4 +4,4 @@
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/python-distutils.mk
 
-DEB_PYTHON_COMPILE_VERSION = 2.2
+DEB_PYTHON_COMPILE_VERSION = 2.3
