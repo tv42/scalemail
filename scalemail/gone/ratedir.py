@@ -90,4 +90,7 @@ class RateDir(object):
                         raise igone.RateExceededError, sender
                 last_filename = filename
 
+        # TODO ponder is it better to mark _after_
+        # a succesful send -- it's not atomic either
+        # way, which one is better?
         self._mark(sender, now, last_filename)
