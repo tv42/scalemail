@@ -11,25 +11,31 @@ class ConfigDriver(config.ScalemailConfig):
         config.ScalemailConfig.__init__(self)
         self.config.set('Scalemail', 'spool', spool)
 
+class AccountGetterDriver(util.AccountGetter):
+    def __init__(self, accounts, *a, **kw):
+        super(AccountGetterDriver, self).__init__(*a, **kw)
+        self.__accounts = accounts
+
+    def _connect(self, domain):
+        return defer.succeed(None)
+
+    def _fetch(self,
+               proto,
+               user, domain,
+               ldapAttributeMailbox,
+               ldapAttributeMailHost,
+               dn):
+        accounts = self.__accounts.get((user, domain), [])
+        return defer.succeed(accounts)
+
 class VirtualMapFactoryDriver(virtual.ScalemailVirtualMapFactory):
     def __init__(self, accounts={}, *a, **kw):
         virtual.ScalemailVirtualMapFactory.__init__(self, *a, **kw)
         self.__accounts = accounts
 
     def _getAccount(self, config, local, domain):
-        accounts = self.__accounts.get((local, domain), [])
-        d = defer.succeed(accounts)
-
-        def _searchCompleted(entries):
-            if len(entries) < 1:
-                raise util.ScaleMailAccountNotFound
-            if len(entries) > 1:
-                raise util.ScaleMailAccountMultipleEntries
-            e = entries[0]
-            return e
-        d.addCallback(_searchCompleted)
-
-        return d
+        f = AccountGetterDriver(self.__accounts, config)
+        return f.getAccount(local, domain)
 
 class TestVirtual(unittest.TestCase):
     def setUp(self):
