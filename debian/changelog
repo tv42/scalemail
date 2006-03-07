@@ -1,3 +1,10 @@
+scalemail (0.18) unstable; urgency=low
+
+  * Depend on python2.3-twisted-core (>= 2.2) and python2.3-twisted-mail
+    (>= 0.2).
+
+ -- Tommi Virtanen <tv@debian.org>  Tue,  7 Mar 2006 19:10:46 +0200
+
 scalemail (0.17) unstable; urgency=low
 
   * Drop priviledges in scalemail-courier-login. Fixes a bug where imapd
