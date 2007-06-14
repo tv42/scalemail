@@ -2,13 +2,13 @@ Source: scalemail
 Section: mail
 Priority: optional
 Maintainer: Tommi Virtanen <tv@debian.org>
-Standards-Version: 3.6.1
-Build-Depends: cdbs (>= 0.4.8.1), debhelper (>= 4.1.0), python, python2.3, python2.3-dev
+Standards-Version: 3.7.2
+Build-Depends: cdbs (>= 0.4.8.1), debhelper (>= 4.1.0), python-dev, python-support
 
 Package: scalemail
 Section: mail
 Architecture: all
-Depends: ${python:Depends}, python-twisted-core , python-twisted-mail , python-ldaptor , postfix (>= 0.0.20010329.SNAPSHOT), python-zopeinterface
+Depends: ${python:Depends}, python-twisted-core , python-twisted-mail , python-ldaptor , postfix (>= 0.0.20010329.SNAPSHOT), python-zopeinterface, adduser
 Suggests: courier-imap-ssl | courier-ssl, slapd
 Description: Scalable virtual mail domain system built on Postfix and LDAP
  A scalable (but not HA, at least not yet) virtual domain system for

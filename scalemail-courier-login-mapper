@@ -1,4 +1,4 @@
-#!/usr/bin/python2.3
+#!/usr/bin/python
 #
 #    scalemail-courier-login-mapper - make Courier-IMAP match Scalemail accounts
 #    Copyright (C) 2001  Tommi Virtanen <tv@debian.org>

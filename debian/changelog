@@ -1,3 +1,15 @@
+scalemail (0.18-0.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Update package to the last python policy (Closes: #380941).
+  * Bump Standards-Version to 3.7.2.
+  * Build with default python.
+  * Add missing depends on adduser.
+  * Fix FSF address.
+  * Fix python2.3 shebangs, and ensure we at least build for python2.3.
+
+ -- Pierre Habouzit <madcoder@debian.org>  Sat, 12 Aug 2006 14:10:48 +0200
+
 scalemail (0.18-0.1) unstable; urgency=medium
 
   * Non-maintainer upload.
