@@ -1,5 +1,4 @@
 from twisted.trial import unittest
-from twisted.trial import util as testutil
 from twisted.internet import reactor, defer, protocol
 import os, sys
 from scalemail import virtual, config, util
@@ -79,29 +78,14 @@ class TestGetAccount(unittest.TestCase):
             'dc=': _overrideConnect,
             })
 
-    def failUnlessRaises_GetException(self, exception, f, *args, **kwargs):
-        self._assertions += 1
-        try:
-            e = raises(exception, f, *args, **kwargs)
-            if not e:
-                raise unittest.FailTest, '%s not raised' % exception.__name__
-            return e
-        except unittest.FailTest, e:
-            raise
-        except:
-            # import traceback; traceback.print_exc()
-            raise unittest.FailTest, '%s raised instead of %s' % (sys.exc_info()[0],
-                                                                  exception.__name__)
-
     def testFDLeakBug(self):
         d = util.getAccount(self.config,
                             local='""',
                             domain='',
                             clientFactory=CountingLDAPClient)
-        e = self.failUnlessRaises_GetException(
-            ldaperrors.LDAPOther,
-            testutil.wait, d)
-        self.assertEquals(e.message, 'just testing')
-        reactor.iterate()
-        self.assertEquals(CountingLDAPClient.count, 0)
-        
+        self.assertFailure(d, ldaperrors.LDAPOther)
+        def cb(e):
+            self.assertEquals(e.message, 'just testing')
+            self.assertEquals(CountingLDAPClient.count, 0)
+        d.addCallback(cb)
+        return d
