@@ -3,7 +3,7 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEMessage import MIMEMessage
 import email.Utils
 from twisted.internet import defer
-from twisted.protocols import smtp
+from twisted.mail import smtp
 from scalemail.gone import igone, blacklist, ratedir
 from scalemail.gone import util as goneutil
 from scalemail import util

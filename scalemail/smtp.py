@@ -1,6 +1,6 @@
 import errno, datetime, email
 from twisted.python import log
-from twisted.protocols import smtp
+from twisted.mail import smtp
 from ldaptor.protocols import pureldap
 from ldaptor.protocols.ldap import ldapclient, ldapsyntax, distinguishedname, ldapconnector
 from twisted.mail import maildir, protocols
