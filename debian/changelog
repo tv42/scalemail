@@ -1,3 +1,10 @@
+scalemail (0.18-0.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * Update dependencies (Closes: #377089).
+
+ -- Luk Claes <luk@debian.org>  Wed, 19 Jul 2006 18:13:45 +0200
+
 scalemail (0.18) unstable; urgency=low
 
   * Depend on python2.3-twisted-core (>= 2.2) and python2.3-twisted-mail
