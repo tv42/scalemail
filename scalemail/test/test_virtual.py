@@ -1,5 +1,4 @@
 from twisted.trial import unittest
-from twisted.trial import util as testutil
 from twisted.internet import defer, protocol, address
 from twisted.python import components
 import os
@@ -16,7 +15,8 @@ class ConfigDriver(config.ScalemailConfig):
         self.config.set('Scalemail', 'spool', spool)
 
         d = inmemory.fromLDIFFile(StringIO(ldif))
-        self.db = testutil.wait(d)
+        assert d.called, 'The Deferred must trigger synchronously'
+        self.db = d.result
 
     def getServiceLocationOverride(self):
         return {'': self._createClient}
