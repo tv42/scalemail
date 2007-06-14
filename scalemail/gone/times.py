@@ -13,8 +13,16 @@ class StartMustPredateStopError(Exception):
 class TimeInterval(object):
     start = None
     stop = None
+
+    def _timify(self, t):
+        """Convert a date to datetime, for comparison."""
+        if (isinstance(t, datetime.date)
+            and not isinstance(t, datetime.datetime)):
+            t = datetime.datetime.combine(t, datetime.time())
+        return t
+
     def __init__(self, start, stop):
-        if start > stop:
+        if self._timify(start) > self._timify(stop):
             raise StartMustPredateStopError, (start, stop)
         self.start = start
         self.stop = stop
@@ -66,7 +74,9 @@ class TimeInterval(object):
 
     def __contains__(self, time):
         # inclusive so date-only ranges act sanely
-        return (time >= self.start and time <= self.stop)
+        t = self._timify(time)
+        return (t >= self._timify(self.start)
+                and t <= self._timify(self.stop))
 
     def __str__(self):
         return '%s %s' % (self.start.isoformat(),
@@ -82,8 +92,8 @@ class TimeInterval(object):
         if not isinstance(other, self.__class__):
             return NotImplemented
 
-        if (self.start == other.start
-            and self.stop == other.stop):
+        if (self._timify(self.start) == self._timify(other.start)
+            and self._timify(self.stop) == self._timify(other.stop)):
             return True
         else:
             return False
@@ -92,8 +102,8 @@ class TimeInterval(object):
         if not isinstance(other, self.__class__):
             return NotImplemented
 
-        if (self.start != other.start
-            or self.stop != other.stop):
+        if (self._timify(self.start) != self._timify(other.start)
+            or self._timify(self.stop) != self._timify(other.stop)):
             return True
         else:
             return False
@@ -109,8 +119,12 @@ class TimeInterval(object):
         if not isinstance(other, self.__class__):
             return NotImplemented
 
-        start = max(self.start, other.start)
-        stop = min(self.stop, other.stop)
+        start = max(
+            self._timify(self.start),
+            self._timify(other.start))
+        stop = min(
+            self._timify(self.stop),
+            self._timify(other.stop))
         if start > stop:
             return None
         return self.__class__(start, stop)
