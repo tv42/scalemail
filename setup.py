@@ -30,6 +30,9 @@ Python and Twisted.
         "scalemail.gone",
         "scalemail.gone.test",
 	],
+          scripts=[
+        'scalemail-checkpassword',
+        ],
           data_files=[('/etc/scalemail',
                        ["scalemail.conf"]),
                       ('/etc/ldap/schema',
