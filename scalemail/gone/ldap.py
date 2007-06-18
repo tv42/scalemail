@@ -1,4 +1,4 @@
-from scalemail.gone import parse, times, respond
+from scalemail.gone import parse, times
 
 def is_active(config, entry, now):
     l = []

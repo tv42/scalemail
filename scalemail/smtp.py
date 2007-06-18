@@ -2,9 +2,9 @@ import errno, datetime, email
 from twisted.python import log
 from twisted.mail import smtp
 from ldaptor.protocols import pureldap
-from ldaptor.protocols.ldap import ldapclient, ldapsyntax, distinguishedname, ldapconnector
+from ldaptor.protocols.ldap import ldapclient, ldapsyntax, ldapconnector
 from twisted.mail import maildir, protocols
-from twisted.internet import protocol, reactor, defer
+from twisted.internet import reactor, defer
 from scalemail import util
 from scalemail.gone import ldap, respond
 from scalemail.gone import util as goneutil

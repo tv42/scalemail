@@ -1,4 +1,4 @@
-from twisted.trial import unittest, util
+from twisted.trial import unittest
 from twisted.internet import defer
 import datetime
 from ldaptor import entry

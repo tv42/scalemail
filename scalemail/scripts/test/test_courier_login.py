@@ -2,7 +2,6 @@ import os
 from twisted.trial import unittest
 from twisted.internet import defer
 from twisted.cred import error
-from cStringIO import StringIO
 from ldaptor import config as ldapconfig
 from scalemail.scripts import courier_login
 from scalemail.test.test_virtual import SetupMixin

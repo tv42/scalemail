@@ -4,8 +4,8 @@ from twisted.python import components
 import os
 from cStringIO import StringIO
 from scalemail import virtual, config, util
-from ldaptor import entry, inmemory, interfaces
-from ldaptor.protocols.ldap import ldapclient, ldapserver, ldaperrors
+from ldaptor import inmemory, interfaces
+from ldaptor.protocols.ldap import ldapclient, ldapserver
 from ldaptor.test import util as ldaptestutil
 
 class ConfigDriver(config.ScalemailConfig):

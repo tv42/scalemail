@@ -1,9 +1,9 @@
 from twisted.trial import unittest
-from twisted.internet import reactor, defer, protocol
-import os, sys
-from scalemail import virtual, config, util
+from twisted.internet import defer, protocol
+import os
+from scalemail import config, util
 from ldaptor.protocols.ldap import distinguishedname, ldapclient, ldaperrors, ldapserver
-from ldaptor.protocols import pureldap, pureber
+from ldaptor.protocols import pureldap
 
 class ConfigDriver(config.ScalemailConfig):
     configFiles = []

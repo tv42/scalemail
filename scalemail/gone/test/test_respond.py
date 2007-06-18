@@ -1,6 +1,6 @@
 from twisted.trial import unittest
 import email
-from scalemail.gone import respond, util
+from scalemail.gone import respond
 
 class Prepare(unittest.TestCase):
     def setUp(self):

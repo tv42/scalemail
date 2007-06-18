@@ -1,5 +1,3 @@
-from scalemail import util
-
 def scalemailMapper(config, account, local, domain):
     # local@scalemail.example.com
     # -> local@box.scalemail.example.com

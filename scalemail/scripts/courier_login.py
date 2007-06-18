@@ -1,12 +1,10 @@
 import os, sys, pwd, grp
-from twisted.internet import protocol, reactor, defer
+from twisted.internet import defer
 from twisted.cred import credentials, error
 from twisted.mail.maildir import initializeMaildir
 from twisted.python.util import switchUID
 from ldaptor import checkers
 from ldaptor import config as ldapconfig
-from ldaptor.protocols import pureldap
-from ldaptor.protocols.ldap import ldaperrors, ldapsyntax, ldapclient, ldapconnector
 from scalemail import config
     
 class LoginError(Exception):

@@ -4,7 +4,6 @@ I am the support module for running a Scalemail SMTP server with twistd --python
 
 from twisted.internet import app
 from scalemail import smtp, virtual, config
-from ldaptor import usage
 
 # TODO make Application accept string uid/gid.
 import pwd, grp

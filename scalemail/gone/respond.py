@@ -1,5 +1,4 @@
 import sets
-from email.MIMEMultipart import MIMEMultipart
 from email.MIMEMessage import MIMEMessage
 import email.Utils
 from twisted.internet import defer
