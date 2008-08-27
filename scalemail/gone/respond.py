@@ -61,6 +61,9 @@ def prepare(msg,
     if 'Subject' not in reply:
         subject = msg['Subject']
         if subject is None:
+            # echo foo | mail testaccount has no subject, if vacation
+            # message has no subject either, sees this.. ugly due to
+            # lack of l10n
             subject = 'Your mail'
         if subjectPrefix is not None:
             subject = subjectPrefix + subject
