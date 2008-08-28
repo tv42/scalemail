@@ -2,10 +2,6 @@
 import os, os.path, commands
 import formatter, StringIO
 
-PYTHON_VERSIONS=['2.3']
-PYTHON_VERSION_DEFAULT='2.3'
-PYTHON_VERSION_TOOBIG='2.4'
-
 def reflow(s):
     out=StringIO.StringIO()
     w=formatter.DumbWriter(out)
@@ -29,12 +25,8 @@ def reflow(s):
 
 
 class CmdDict:
-    def __init__(self, setup=None, **kwargs):
+    def __init__(self, setup=None):
 	self.setup=setup
-	self.vars=kwargs
-
-    def handle_var(self, var):
-	return self.vars[var]
 
     def handle_setup(self, cmd):
 	assert self.setup
@@ -60,12 +52,6 @@ class CmdDict:
 		  % (repr(cmd), status)
 	return output
 
-    def handle_forpython(self, s):
-	l=[]
-	for pyver in PYTHON_VERSIONS:
-	    l.append(s % pyver)
-	return ', '.join(l)
-
     def __getitem__(self, s):
 	first, rest = s.split(None, 1)
 	f=getattr(self, 'handle_'+first.replace('-', '_'))
@@ -75,7 +61,7 @@ otherpackage = """
 Package: %(setup --name)s
 Section: %(extract-setup-var debian-section)s
 Architecture: all
-Depends: ${python:Depends}, python%(var PYTHON_VERSION_DEFAULT)s-twisted, python%(var PYTHON_VERSION_DEFAULT)s-ldaptor (>= 0.0.25), postfix (>= 0.0.20010329.SNAPSHOT)
+Depends: ${python:Depends}, python-twisted-core, python-twisted-mail, python-ldaptor (>= 0.0.25), postfix (>= 0.0.20010329.SNAPSHOT), python-zopeinterface, adduser
 Suggests: courier-imap-ssl | courier-ssl, slapd
 Description: %(setup --description)s
 """
@@ -87,14 +73,11 @@ Source: %(shell dpkg-parsechangelog|sed -n 's/^Source: //p')s
 Section: %(extract-setup-var debian-section)s
 Priority: optional
 Maintainer: %(setup --contact)s <%(setup --contact-email)s>
-Standards-Version: 3.5.6
-Build-Depends-Indep: cdbs (>= 0.4.8.1), debhelper (>= 4.1.0), python, %(forpython python%s)s, %(forpython python%s-dev)s
+Standards-Version: 3.7.2
+Build-Depends: cdbs (>= 0.4.8.1), debhelper (>= 4.1.0), python-dev, python-support
 """ % CmdDict(filename)
 
-c=CmdDict(filename,
-          PYTHON_VERSION_DEFAULT=PYTHON_VERSION_DEFAULT,
-          PYTHON_VERSION_TOOBIG=PYTHON_VERSION_TOOBIG,
-          )
+c=CmdDict(filename)
 print otherpackage.strip() % c
 print reflow('%(setup --long-description)s' % c)
 print
