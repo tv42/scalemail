@@ -1,5 +1,17 @@
 #!/bin/sh
 
+### BEGIN INIT INFO
+# Provides:          scalemail
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Scalemail virtual mail domain system
+# Description:        A virtual domain system for handling mail for
+#                     many users, based on Postfix, LDAP,
+#                     Binc IMAP, Python and Twisted.
+### END INIT INFO
+
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 pidfile=/var/run/scalemail/scalemail.pid
@@ -37,8 +49,25 @@ case "$1" in
         $0 restart
     ;;
 
+    status)
+	echo -n "Status of scalemail: "
+
+	if [ ! -r "$pidfile" ]; then
+	    echo "not running."
+	    exit 3
+	fi
+
+	if read pid < "$PIDFILE" && /bin/kill -0 "$pid"; then
+            echo "running."
+            exit 0
+        else
+            echo "not running but $pidfile exists."
+            exit 1
+        fi
+    ;;
+
     *)
-        echo "Usage: /etc/init.d/scalemail {start|stop|restart|force-reload}" >&2
+        echo "Usage: /etc/init.d/scalemail {start|stop|restart|force-reload|status}" >&2
         exit 1
     ;;
 esac
