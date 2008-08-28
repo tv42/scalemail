@@ -1,9 +1,38 @@
 scalemail (0.19) unstable; urgency=low
 
   * Acknowledge NMUs. Closes: #378905, #377089, #380941.
+  * Add an LDAP-checking checkpassword implementation.
+    This can be used to integrate Binc IMAP with Scalemail; I am phasing
+    out Courier-IMAP support, as the functionality available there becomes
+    more and more hostile towards writing a simple authenticator
+    plugin. Scalemail will probably not work with modern version of
+    Courier-IMAP.
+  * Make a rudimentary effort at LSB-compliant init script.
+  * Don't hardcode python version in init script.
+  * Depend on python-openssl.
+    Scalemail uses Ldaptor, Ldaptor uses twisted.internet.ssl, and that
+    uses PyOpenSSL, but some versions of Ldaptor are missing the
+    dependency in the deb package, thus making scalemail not importable
+    without python-openssl.
+  * Refactor to follow new Twisted APIs:
+    - avoid calling twisted.trial.util.wait, which is deprecated
+    - it's twisted.mail.smtp now
+    - use twisted.application
+  * Refactor to follow python APIs:
+    - can't compare date and datetime directly
   * Whitespace cleanup debian/control
+  * Re-add versioned dependency on python-ldaptor that was lost in the
+    NMUs.
+    Sure, it's basically not possible to get that combination from
+    Debian/Ubuntu, but I still don't feel dropping versions from
+    dependencies is right.
+  * Make init script handle python libs not found just file missing.
+    This is absolutely not the perfect strategy (makes syntax errors look
+    like missing file), but without this, bad old init scripts can prevent
+    upgrades totally.
+  * Pyflakes cleanup.
 
- -- Tommi Virtanen <tv@debian.org>  Thu, 14 Jun 2007 15:06:44 +0300
+ -- Tommi Virtanen <tv@debian.org>  Thu, 28 Aug 2008 15:50:14 +0300
 
 scalemail (0.18-0.2) unstable; urgency=low
 
