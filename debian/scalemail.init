@@ -21,11 +21,12 @@ rundir=/
 # just a python module name 2) the various versions of python support
 # mechanisms in Debian/Ubuntu make trusting any single location
 # fragile
-file="$(python -c 'import os, scalemail.backend; print os.path.join(os.path.dirname(scalemail.backend.__file__), "backend.py")')"
+file="$(python -c 'import os, scalemail.backend; print os.path.join(os.path.dirname(scalemail.backend.__file__), "backend.py")' 2>/dev/null)"
 
 more_args=--no_save
 
 test -x /usr/bin/twistd || exit 0
+test "$file" != "" || exit 0
 test -r $file || exit 0
 
 case "$1" in
